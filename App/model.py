@@ -72,7 +72,8 @@ def new_catalog () -> dict:
 
     # Definir variable que guarda la información del catálogo e inicializar las parejas llave-valor.
     catalog = {'artists': None,
-               'artworks': None}
+               'artworks': None,
+               'BeginDate': None}
 
 
     #####-----#####-----#####-----#####   Definición Listas de Elementos   #####-----#####-----#####-----#####
@@ -104,12 +105,15 @@ def new_catalog () -> dict:
     #####-----#####-----#####   Definición Maps/Índices   #####-----#####-----#####
 
     """
-        A continuacion se crearán índices por diferentes criterios
-        para llegar a la informacion requerida. Estos índices no
-        replican informacion, solo referencian los libros de la lista
-        creada anteriormente.
+        A continuacion se crearán maps por diferentes criterios
+        para llegar a la informacion requerida. Estos no replican información,
+        solo referencian los elementos de las listas de artistas y obras.
     
     """
+
+    # Map cuyas llaves son años de nacimiento y cuyas llaves son listas enlazadas que contienen
+    # información relevante de los artistas que nacieron el año correspondiente.
+    catalog["BeginDate"] = mp.newMap(10000, maptype='CHAINING', loadfactor=4.0,)   # Determinar tipo de mapa y tamaño adecuados.
 
 
     #####-----#####-----#####-----#####   Retorno   #####-----#####-----#####-----#####
@@ -168,6 +172,63 @@ def add_artwork (catalog: dict, artwork_info: dict) -> None:
 
     # Agregar la obra a la última posición de la lista "obras".
     lt.addLast(catalog['artworks'], artwork_new)
+
+
+
+# Función que agrega una pareja llave valor al map "BeginDate".
+def add_BeginDate (catalog: dict, param_BeginDate: int, artist: dict) -> None:
+    """
+        Esta función permite agregar una pareja llave-valor al map "BeginDate" del catálogo.
+        
+        La llave deberá ser un año de nacimiento, es decir, un número entero positivo.
+        El valor será una lista enlazada, cuyos elementos son diccionarios que
+        representan a cada artista (para más detalle de qué información contienen estos
+        diccionarios, revisar la documentación de la función new_artist()).
+
+        En caso de que la pareja año-lista_artistas ya exista, se añadirá el artista a lista_artistas
+        referente al año de nacimiento respectivo (la llave).
+        En caso de que la pareja año-lista_artistas no exitsa, se creará la lista que contiene a los
+        artistas que nacieron en la llave año, se añadirá la información del artista a dicha lista
+        y se añadirá la nueva pareja año-lista_artistas al map "BeginDate" del catálogo.
+
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_BeginDate (int): llave referente a un año de nacimiento.
+            -> artist (dict): diccionario que representa al artista que se quiere añadir.
+
+        No tiene retorno.
+
+    """
+
+    # Crear variable que guarda el mapa "BeginDate" del catálogo.
+    map_BeginDate = catalog["BeginDate"]
+
+    # Determinar si la pareja llave-valor ya existe.
+    ya_existe = mp.contains(map_BeginDate, param_BeginDate)
+
+
+    # Si ya existe la pareja llave-valor.
+    if (ya_existe):
+
+        # Crear variable que guarda la lista de los artistas que nacieron en param_BeginDate.
+        list_BegDat_artists = mp.get(map_BeginDate, param_BeginDate)["value"]
+
+        # Añade el artista a list_BegDet_artists.
+        lt.addLast(list_BegDat_artists, artist)
+
+
+    # Si no existe la pareja llave-valor.
+    else:
+
+        # Crear una nueva lista de los artistas que nacieron en param_BeginDate.
+        new_list_BegDat_artists = lt.newList('SINGLE_LINKED')
+        
+        # Añade el artista a list_BegDet_artists.
+        lt.addLast(new_list_BegDat_artists, artist)
+
+        # Añade a pareja año-lista_artistas al map.
+        mp.put(map_BeginDate, param_BeginDate, new_list_BegDat_artists)
 
 
 
@@ -277,7 +338,6 @@ def new_artwork (artwork_info: dict) -> dict:
 
     # Retornar obra.
     return artwork
-
 
 
 

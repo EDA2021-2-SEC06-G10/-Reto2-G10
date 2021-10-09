@@ -28,6 +28,7 @@ import config as cf
 import model
 import csv
 from DISClib.ADT import list as lt
+from DISClib.ADT import map as mp
 
 
 
@@ -88,7 +89,11 @@ def load_artists (catalog: dict) -> None:
         los artistas al catálogo.
 
         Lo que hace es cargar toda la información de cada artista presente en la base de datos.
-        Luego, mediante la función add_artist() carga la información del artista al catálogo.
+        Luego, para cargar la infomación al catálogo, hace lo siguiente:
+            -> Mediante la función add_artist() carga la información del artista al catálogo.
+            -> Mediante la función add_BeginDate() carga la información del artista al map "BeginDate"
+               del catálogo.
+        
 
         Parámetro:
             -> catalog (dict): el catálogo.
@@ -103,9 +108,19 @@ def load_artists (catalog: dict) -> None:
     # Crear variable que guarda todos los artistas.
     input_file = csv.DictReader(open(artists_file, encoding='utf-8'))
 
-    # Añadir cada artista al catálogo.
+
+    # Iterar sobre cada artista del catálogo.
     for artist_info in input_file:
+        
+        # Añadirlo a la lista 'artists' del catálogo.
         model.add_artist(catalog, artist_info)
+
+        # Determinar su año de nacimiento.
+        artists_BegDat = int(float(artist_info["BeginDate"]))
+
+        # Añadirlo al map "BeginDate" si su año de nacimiento está registrado.
+        if not (artists_BegDat == 0):
+            model.add_BeginDate(catalog, artists_BegDat, artist_info)
 
 
 
@@ -153,6 +168,17 @@ def load_artworks (catalog: dict) -> None:
 
 
 
+# Pruebas.
 
 catalog = init_catalog()
 load_data(catalog)
+
+# Mapa BeginDate.
+mapa_begdat = catalog["BeginDate"]
+
+
+lista_acual = mp.get(mapa_begdat, 1941)['value']
+iterador_elem_lista = lt.iterator(lista_acual)
+
+for elemento in iterador_elem_lista:
+    print(elemento)
