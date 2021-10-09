@@ -45,19 +45,22 @@ assert cf
 """
     Se define la estructura que contiene el catálogo del museo.
     Este tendrá dos listas, una para los artistas y otra para las obras.
+    Además, tendrá una serie de maps que guardarán información de interés de cada grupo de
+    elementos, como la fecha de nacimiento de los artistas y la técnica de las obras.
 
 """
 
 # Función que crea el catálogo.
-def new_Catalog () -> dict:
+def new_catalog () -> dict:
     """
-        Esta función permite crear la estructura que guarda el catálogo del museo.
+        Esta función permite crear la estructura de datos que guarda el catálogo del museo.
         
         Crea dos listas vacías que permitirán guardar los siguientes elementos:
          1- Los artistas.
          2- Las obras.
 
-        Además, esta función crea un índice por técnica ("Mediums") de cada obra.
+        Además, la función crea los siguientes maps, los cuales guardarán información de interés de cada grupo de elementos:
+         1- Mediums: guarda la información de las obras que fueron creadas usando la técnica de la llave respectiva.
 
 
         No tiene parámetros.
@@ -67,24 +70,38 @@ def new_Catalog () -> dict:
 
     """
 
-    # Definir variable que guarda la información del catálogo e inicializarla.
-    catalog = {'artworks': None,
-                'Mediums': None}
+    # Definir variable que guarda la información del catálogo e inicializar las parejas llave-valor.
+    catalog = {'artists': None,
+               'artworks': None}
 
 
-    #####-----#####-----#####-----#####   Definición Listas Elementos   #####-----#####-----#####-----#####
-
+    #####-----#####-----#####-----#####   Definición Listas de Elementos   #####-----#####-----#####-----#####
     """
-        La siguiente lista contiene todas los obras encontradas en 
-        los archivos de carga. Estas no estás ordenadas bajo ningún 
-        criterio, y son referenciadas por los índices que se definirán
-        en seguida.
+        La siguiente lista contiene la información de todos los artistas encontrados en  los archivos de carga.
+        Estos no están ordenadas bajo ningún criterio, y son referenciados por los índices que se definirán en 
+        seguida.
+
+        Cada artista se representa mediante un diccionario, cuyas parejas llave-valor representan información
+        relevante de cada artista (como su nombre, id, fecha de nacimiento, entre otros). Toda la información
+        que se guarda de cada artista se especfica detalladamente en la función new_artist(). 
+    
+    """
+    catalog['artists'] = lt.newList('SINGLE_LINKED')            # Pendiente añadir función de comparación.
+    
+    """
+        La siguiente lista contiene la información de todas las obras encontradas en  los archivos de carga.
+        Estas no están ordenadas bajo ningún criterio, y son referenciadas por los índices que se definirán en 
+        seguida.
+
+        Cada obra se representa mediante un diccionario, cuyas parejas llave-valor representan información
+        relevante de cada obra (como su título, los id de sus autores, entre otros). Toda la información
+        que se guarda de cada obra se especfica detalladamente en la función new_artwork(). 
     
     """
     catalog['artworks'] = lt.newList('SINGLE_LINKED')            # Pendiente añadir función de comparación.
 
 
-    #####-----#####-----#####   Definición Índices   #####-----#####-----#####
+    #####-----#####-----#####   Definición Maps/Índices   #####-----#####-----#####
 
     """
         A continuacion se crearán índices por diferentes criterios
@@ -93,21 +110,11 @@ def new_Catalog () -> dict:
         creada anteriormente.
     
     """
-    
-    # Índice que crea un map cuya llave es la técnica las obras.
-    catalog['Mediums'] = mp.newMap(4000,
-                                  maptype='PROBING',
-                                  loadfactor=0.5,
-                                  comparefunction="") # Pendiente añadir función de comparación del map.
 
 
     #####-----#####-----#####-----#####   Retorno   #####-----#####-----#####-----#####
 
     return catalog
-
-
-# Funciones para agregar informacion al catalogo
-
 
 
 
@@ -117,56 +124,50 @@ def new_Catalog () -> dict:
 #####-----#####-----#####-----#####-----#####   ###---###----###   #####-----#####-----######-----####-----#####
 
 """
-    Se define las funciones que permitirán añadir elementos al catálogo.
+    Se definen las funciones que permitirán añadir elementos al catálogo.
 
 """
 
+# Función que agrega un artista al catálogo.
+def add_artist (catalog: dict, artist_info: dict) -> None:
+    """
+        Esta función permite crear y agregar un artista al catálogo usando la información
+        pasada por parámetro y guardándolo en la lista "artists".
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> artist_info (dict): información del artista que se quiere adicionar. 
+
+        No tiene retorno.
+
+    """
+    
+    # Crear un artista con los datos ingresados por parámetro.
+    artist_new = new_artist(artist_info)
+
+    # Agregar el artista a la última posición de la lista "artists".
+    lt.addLast(catalog['artists'], artist_new)
+
+
+
 # Función que agrega una obra al catálogo.
-def add_artwork (catalog: dict, artwork: dict) -> None:
+def add_artwork (catalog: dict, artwork_info: dict) -> None:
     """
         Esta función permite agregar una obra al catálogo, guardándolo en el arreglo 'obras'.
 
         Parámetros:
             -> catalog (dict): catálogo.
-            -> artwork (dict): obra que se quiere adicionar. 
+            -> artwork_info (dict): obra que se quiere adicionar. 
 
         No tiene retorno.
 
     """
     
     # Crear una obra con los datos ingresados por parámetro.
-    artwork_new = new_artwork(artwork)
+    artwork_new = new_artwork(artwork_info)
 
     # Agregar la obra a la última posición de la lista "obras".
     lt.addLast(catalog['artworks'], artwork_new)
-
-
-
-# Función que agrega una obra al índice de técnicas.
-def add_medium (catalog: dict, artwork: dict) -> None:
-    """
-        Esta función permite agregar al índice "Mediums" del catálogo una pareja llave-valor 
-        referente a una técnica y obra determinadas.
-
-        Parámetros:
-            -> catalog (dict): catálogo.
-            -> artwork (dict): obra.
-
-        No tiene retorno.
-
-    """
-
-    # Crear variable que guarda el map 'Mediums' del catálogo.
-    mediums = catalog['Mediums']
-
-    # Guardar técnica de la obra ingresada por parámetro.
-    medium_artwork = artwork['Medium']
-   
-    # Si la obra tiene una técnica registrada.
-    if (medium_artwork != ''):
-        # Añadir obra.
-        mp.put(mediums, medium_artwork, artwork) 
-
 
 
 
@@ -177,9 +178,44 @@ def add_medium (catalog: dict, artwork: dict) -> None:
 
 """
     Se define las funciones que permitirán crear elementos referentes a información
-    de interés del catálogo, como los artistas, las obras, las técnicas, entre otros.
+    de interés del catálogo (como los artistas, las obras, las técnicas, entre otros).
 
 """
+
+# Función que crea un artista.
+def new_artist (artist_info: dict) -> dict:
+    """
+        Esta función permite crear un artista. Estos se representarán mediante 
+        el tipo de dato dict de Python.
+
+        Parámetros:
+            -> artist_info (dict): diccionario que tiene toda la información de interés del artista.
+
+        Retorno:
+            -> (dict): diccionario que representa al artista.
+
+    """
+
+    # Crear diccionario con la información de interés del artista.
+    artist = {"ConstituentID": 0,
+              "DisplayName": "",
+              "Nationality": "",
+              "Gender": "",
+              "BeginDate": 0,
+              "EndDate": 0}
+
+    # Añadir datos.
+    artist["ConstituentID"] = int(float(artist_info["ConstituentID"]))
+    artist["DisplayName"] = artist_info["DisplayName"]
+    artist["Nationality"] = artist_info["Nationality"]
+    artist["Gender"] = artist_info["Gender"]
+    artist["BeginDate"] = int(float(artist_info["BeginDate"]))
+    artist["EndDate"] = int(float(artist_info["EndDate"]))
+
+    # Retornar al artista.
+    return artist
+
+
 
 # Función que crea una nueva obra.
 def new_artwork (artwork_info: dict) -> dict:
@@ -216,7 +252,6 @@ def new_artwork (artwork_info: dict) -> dict:
 
     # Crear variable que guarda la lista de los id de los atistas que crearon la obra y asignarle la lista
     # que contiene dichos datos.
-    list_artists_id = []
     list_artists_id = turn_into_list(artwork_info["ConstituentID"])
 
 
@@ -227,7 +262,7 @@ def new_artwork (artwork_info: dict) -> dict:
         is_ConstituentID = (property == "ConstituentID")
 
         # Si la obra no tiene la propiedad actual.
-        if (artwork[property] == ""):
+        if (artwork_info[property] == ""):
             # Asignar el valor de la propiedad como "".
             artwork[property] = ""
 
@@ -270,9 +305,6 @@ def turn_into_list (list_in_str: str) -> list:
             -> (list): lista con los id de los artistas que crearon la obra.
 
     """
-
-    # Crear lsta vacía en la que se guardarán los id de los artistas.
-    artists_list = []
 
     # Crear sublista que contenga solo los id de los artistas mediante slicing y la función split().
     # Se hace parar borra los caracteres "[" y "]" que se encuentran al final de la cadena.
