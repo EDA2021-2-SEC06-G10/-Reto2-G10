@@ -11,43 +11,28 @@ Integrantes:
 
 ##--##--##  General  ##--##--##
 
- 1- Se añadió la carpeta de datos (MoMA) al repositorio.
+ 1- Se añadió la sección "funciones requerimientos".
+ 2- Se añadió la sección "funciones de comparación".
 
 
 ##--##--##  Model  ##--##--##
 
- 1- Se actualizó la documentación relacionada a la estructura del catálogo.
+ 1- Se definieron las siguientes funciones:
+    -> req_1().
+    -> cmp_BeginDates().
+  
+ 2- Se actualizó la función de comparación de la lista "artists" del catálogo en la función new_catalog().
 
- 2- Se actualizó la función newCatalog() para que sea posible añadir la información de los artistas.
-
- 3- Se definieron las siguientes funciones:
-   -> new_artist().
-   -> add_artist().
-
- 4- Se eliminó el map "Medium" del catálogo.
-
- 5-  
 
 
 ##--##--##  Controller  ##--##--##
 
- 1- Se definieron las siguientes funciones:
-   -> init_catalog().
-   -> load_data().
-   -> load_artists().
-   -> load_artworks().
+ 1- 
 
 
 ##--##--##  View  ##--##--##
  
- 1- Se definieron las siguientes funciones:
-   -> print_menu().
-   -> init_catalog().
-   -> load_data().
-
- 2- Se actualizó el iteración indefinida para que notificara error en caso de que el usuario ingrese opciones inválidas.
-
- 3- Se modificó el código de la iteración indefinida para que se pudisese cargar la información al catálogo.
+ 1- 
 
 
 #####-----#####-----#####-----#####   #---#---#   #####-----#####-----#####-----#####
@@ -61,9 +46,16 @@ Integrantes:
 
 ##--##--##  Model  ##--##--##
 
- 1- De la función newCatalog(), determinar si es más conveniente implementar las listas de las obras y de los artistas como una lista enlazada o como un arreglo. Además, hay que añadir las funciones de comparación de cada uno.
+ 1- De la función newCatalog():
+    -> Determinar si es más conveniente implementar las listas de las obras y de los artistas como una lista enlazada o como un arreglo. Además, hay que añadir las funciones de comparación de cada uno.
+    -> Determinar qué tipo de tabla de Hash será la más conveniente para el mapa "BeginDate" y el tamaño adecuado.
+
+  2- Modificar la función new_artist() de tal forma que los datos desconocidos del artista se guarden como "N.A.".
+
+  3- Determinar si la quicksort es el algoritmo más conveniente para ordenar la lista de la función req_1().
+
 
 
 ##--##--##  Controller  ##--##--##
 
- 1- Añadir a la función init_catalog() las funciones que permitirán añadir los maps del catalogo.
+ 1- 

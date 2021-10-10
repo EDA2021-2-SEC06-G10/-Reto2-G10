@@ -173,12 +173,23 @@ def load_artworks (catalog: dict) -> None:
 catalog = init_catalog()
 load_data(catalog)
 
+resp = model.req_1(catalog, 1920, 1985)
+print(lt.size(resp))
+print(lt.getElement(resp, 1)["ConstituentID"], lt.getElement(resp, 1)["BeginDate"])
+print(lt.getElement(resp, 2)["ConstituentID"], lt.getElement(resp, 2)["BeginDate"])
+print(lt.getElement(resp, 3)["ConstituentID"], lt.getElement(resp, 3)["BeginDate"])
+print(lt.getElement(resp, lt.size(resp) - 2)["ConstituentID"], lt.getElement(resp, lt.size(resp) - 2)["BeginDate"])
+print(lt.getElement(resp, lt.size(resp) - 1)["ConstituentID"], lt.getElement(resp, lt.size(resp) - 1)["BeginDate"])
+print(lt.getElement(resp, lt.size(resp))["ConstituentID"], lt.getElement(resp, lt.size(resp))["BeginDate"])
+
+"""
 # Mapa BeginDate.
 mapa_begdat = catalog["BeginDate"]
 
 
-lista_acual = mp.get(mapa_begdat, 1941)['value']
+lista_acual = mp.get(mapa_begdat, 1944)['value']
 iterador_elem_lista = lt.iterator(lista_acual)
 
 for elemento in iterador_elem_lista:
     print(elemento)
+"""

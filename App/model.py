@@ -32,7 +32,7 @@ import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
-from DISClib.Algorithms.Sorting import shellsort as sa
+from DISClib.Algorithms.Sorting import quicksort as qui
 assert cf
 
 
@@ -87,7 +87,7 @@ def new_catalog () -> dict:
         que se guarda de cada artista se especfica detalladamente en la función new_artist(). 
     
     """
-    catalog['artists'] = lt.newList('SINGLE_LINKED')            # Pendiente añadir función de comparación.
+    catalog['artists'] = lt.newList('SINGLE_LINKED', cmpfunction = cmp_BeginDates)
     
     """
         La siguiente lista contiene la información de todas las obras encontradas en  los archivos de carga.
@@ -113,7 +113,7 @@ def new_catalog () -> dict:
 
     # Map cuyas llaves son años de nacimiento y cuyas llaves son listas enlazadas que contienen
     # información relevante de los artistas que nacieron el año correspondiente.
-    catalog["BeginDate"] = mp.newMap(10000, maptype='CHAINING', loadfactor=4.0,)   # Determinar tipo de mapa y tamaño adecuados.
+    catalog["BeginDate"] = mp.newMap(10000, maptype='CHAINING', loadfactor=4.0)   # Determinar tipo de mapa y tamaño adecuados.
 
 
     #####-----#####-----#####-----#####   Retorno   #####-----#####-----#####-----#####
@@ -339,6 +339,106 @@ def new_artwork (artwork_info: dict) -> dict:
     # Retornar obra.
     return artwork
 
+
+
+
+
+#####-----#####-----#####-----#####-----#####   #####---#######----#####   #####-----#####-----#####-----#####-----#####
+#####-----#####-----#####-----#####-----#####   FUNCIONES DE COMPARACIÓN   #####-----#####-----#####-----#####-----#####
+#####-----#####-----#####-----#####-----#####   #####---#######----#####   #####-----#####-----#####-----#####-----#####
+
+"""
+    A continuación se definen las funciones que permitirán comparar
+    y ordenar los elementos del catálogo (incluyendo las llaves de los maps).
+
+"""
+
+# Función que compara dos artistas según su año de nacimiento.
+def cmp_BeginDates (artists_1: dict, artists_2: dict) -> bool:
+    """
+        Esta función permite determinar si el año de nacimiento del primer artista (artists_1)
+        es menor que el año de nacimiento del segundo artista (artists_2).
+
+        Parámetros:
+            -> artists_1 (dict): diccionario que contiene la información del primer artista.
+            -> artists_2 (dict): diccionario que contiene la información del segundo artista.
+
+        Retorno:
+            -> (bool): True en caso de que el año de nacimiento del primer artista sea menor
+                       que el año de nacimiento del segundo artista.
+                       False de lo contrario. 
+
+    """
+
+    # Guardar los años de nacimiento de los artistas.
+    birth_year_1 = artists_1["BeginDate"]
+    birth_year_2 = artists_2["BeginDate"]
+
+    # Crear variable que indica si birth_year_1 es menor que birth_year_2 y retornarla.
+    return_variable = (birth_year_1 < birth_year_2)
+    return return_variable
+
+
+
+
+#####-----#####-----#####-----#####-----#####   #####---#######----#####   #####-----#####-----#####-----#####-----#####
+#####-----#####-----#####-----#####-----#####   FUNCIONES REQUERIMIENTOS   #####-----#####-----#####-----#####-----#####
+#####-----#####-----#####-----#####-----#####   #####---#######----#####   #####-----#####-----#####-----#####-----#####
+
+"""
+    A continuación se definen las funciones referentes a la implementación de
+    los requerimientos.
+
+"""
+
+# Función del requerimiento 1.
+def req_1 (catalog: dict, first_year: int, last_year: int) -> dict:
+    """
+        Esta función permite convertir la cadena de texto que guarda los id de los artistas que crearon
+        una obra en una lista.
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> first_year (int): año inicial.
+            -> last_year (int): año final.
+
+        Retorno:
+            -> (dict): diccionarios que representa la lista que contiene la respuesta.
+
+    """
+
+    # Crear rango que representa un intervalo cerrado que empieza en first_year
+    # y termina en last_year.
+    interval = range(first_year, last_year + 1)
+
+    # Crear lista que contendrá a los artistas que nacieron dentro de interval.
+    return_list = lt.newList("ARRAY_LIST")
+
+    # Guardar el map "BeginDate" del catálogo.
+    map_BeginDate = catalog["BeginDate"]
+
+
+    # Iterar sobre cada año que se encuentra dentro de interval.
+    for year in interval:
+        
+        # Guardar la lista de los artistas que nacieron durante year.
+        artists_list = mp.get(map_BeginDate, year)["value"]
+
+        # Crear lista con los elementos de artists_list.
+        iter_artists_list = lt.iterator(artists_list)
+
+        # Añadir cada artista a return_list.
+        for artist in iter_artists_list:
+            lt.addLast(return_list, artist)
+
+
+    # Ordenar lista cronológicamente (es decir, según los BeginDates).
+    ordered_list = qui.sort(return_list, cmp_BeginDates)
+
+    # Retornar la lista ordenada.
+    return ordered_list
+
+    
 
 
 
