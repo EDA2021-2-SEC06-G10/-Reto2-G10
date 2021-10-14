@@ -29,6 +29,7 @@
 #####-----#####-----#####-----#####-----#####   ####---#####---####   #####-----#####-----#####-----#####-----#####
 
 import config as cf
+from DISClib.DataStructures import probehashtable
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
@@ -73,7 +74,10 @@ def new_catalog () -> dict:
     # Definir variable que guarda la información del catálogo e inicializar las parejas llave-valor.
     catalog = {'artists': None,
                'artworks': None,
-               'BeginDate': None}
+               'BeginDate': None,
+               'Medium': None,
+               'Nationality': None,
+               'ConstituentID': None}
 
 
     #####-----#####-----#####-----#####   Definición Listas de Elementos   #####-----#####-----#####-----#####
@@ -106,14 +110,32 @@ def new_catalog () -> dict:
 
     """
         A continuacion se crearán maps por diferentes criterios
-        para llegar a la informacion requerida. Estos no replican información,
-        solo referencian los elementos de las listas de artistas y obras.
+        para llegar a la información requerida en tiempo constante.
     
     """
 
     # Map cuyas llaves son años de nacimiento y cuyas llaves son listas enlazadas que contienen
     # información relevante de los artistas que nacieron el año correspondiente.
-    catalog["BeginDate"] = mp.newMap(10000, maptype='CHAINING', loadfactor=4.0)   # Determinar tipo de mapa y tamaño adecuados.
+    catalog["BeginDate"] = mp.newMap(10000, maptype='CHAINING', loadfactor = 4.0)   # Determinar tipo de mapa y tamaño adecuados.
+
+
+    # Map cuyas llaves son las técnicas y cuyos valores son listas enlazadas que contienen
+    # información relevante de las obras que fueron creadas usando dicha técnica.
+    # El tamaño del mapa se asignó como el siguiente primo a 146.100, ya que esta es la cantidad de obras que hay.
+    catalog["Medium"] = mp.newMap(probehashtable.nextPrime(146100/0.8), maptype='PROBING', loadfactor=0.8)
+
+
+    # Map cuyas llaves son las nacionalidades y cuyos valores son listas enlazadas que contienen
+    # información relevante de las obras cuyo/s autor/es tiene/n dicha nacionalidad.
+    # El tamaño del mapa se asignó como el siguiente primo a 200, porque hay 194 países reconocidos
+    # por la ONU y se añadieron 6 espacios extra para evitar re-hashing (en la medida de lo posible).
+    catalog["Nationality"] = mp.newMap(probehashtable.nextPrime(200/0.8), maptype='PROBING', loadfactor=0.8)
+
+
+    # Map cuyas llaves son ConstituentID's y cuyos valores son el artista reconocido con dicho ConstituentID.
+    # El tamaño del mapa se asignó como el siguiente primo a 15.224 porque hay 15.224 artistas en el catálogo.
+    catalog["ConstituentID"] = mp.newMap(probehashtable.nextPrime(15224), maptype='CHAINING', loadfactor=4.0)
+
 
 
     #####-----#####-----#####-----#####   Retorno   #####-----#####-----#####-----#####
@@ -175,7 +197,7 @@ def add_artwork (catalog: dict, artwork_info: dict) -> None:
 
 
 
-# Función que agrega una pareja llave valor al map "BeginDate".
+# Función que agrega una pareja llave-valor al map "BeginDate".
 def add_BeginDate (catalog: dict, param_BeginDate: int, artist: dict) -> None:
     """
         Esta función permite agregar una pareja llave-valor al map "BeginDate" del catálogo.
@@ -205,11 +227,11 @@ def add_BeginDate (catalog: dict, param_BeginDate: int, artist: dict) -> None:
     map_BeginDate = catalog["BeginDate"]
 
     # Determinar si la pareja llave-valor ya existe.
-    ya_existe = mp.contains(map_BeginDate, param_BeginDate)
+    exists = mp.contains(map_BeginDate, param_BeginDate)
 
 
     # Si ya existe la pareja llave-valor.
-    if (ya_existe):
+    if (exists):
 
         # Crear variable que guarda la lista de los artistas que nacieron en param_BeginDate.
         list_BegDat_artists = mp.get(map_BeginDate, param_BeginDate)["value"]
@@ -224,11 +246,149 @@ def add_BeginDate (catalog: dict, param_BeginDate: int, artist: dict) -> None:
         # Crear una nueva lista de los artistas que nacieron en param_BeginDate.
         new_list_BegDat_artists = lt.newList('SINGLE_LINKED')
         
-        # Añade el artista a list_BegDet_artists.
+        # Añade el artista a new_list_BegDat_artists.
         lt.addLast(new_list_BegDat_artists, artist)
 
-        # Añade a pareja año-lista_artistas al map.
+        # Añade la pareja año-lista_artistas al map.
         mp.put(map_BeginDate, param_BeginDate, new_list_BegDat_artists)
+
+
+
+# Función que agrega una pareja llave-valor al map "Medium".
+def add_Medium (catalog: dict, param_Medium: str, artwork: dict) -> None:
+    """
+        Esta función permite agregar una pareja llave-valor al map "Medium" del catálogo.
+        
+        La llave deberá ser una técnica/medio, es decir, una cadena de caracteres.
+        El valor será una lista enlazada, cuyos elementos son diccionarios que
+        representan a cada obra (para más detalle de la información contienen estos
+        diccionarios, revisar la documentación de la función new_artwork()).
+
+        En caso de que la pareja técnica-lista_orbas ya exista, se añadirá la obra a lista_obras.
+        En caso de que la pareja técnica-lista_obras no exitsa, se creará la lista que contiene a las
+        obras que fueron creadas con esa técnica, se añadirá la información de la obra a dicha lista
+        y se añadirá la nueva pareja técnica-lista_obras al map "Medium" del catálogo.
+
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_Medium (str): llave referente a una técnica.
+            -> artwork (dict): diccionario que representa a la obra que se quiere añadir.
+
+        No tiene retorno.
+
+    """
+
+    # Crear variable que guarda el mapa "Medium" del catálogo.
+    map_Medium = catalog["Medium"]
+
+    # Determinar si la pareja llave-valor ya existe.
+    exists = mp.contains(map_Medium, param_Medium)
+
+
+    # Si ya existe la pareja llave-valor.
+    if (exists):
+
+        # Crear variable que guarda la lista de las obras quese crearon con dicha técnica.
+        list_Medium_artworks = mp.get(map_Medium, param_Medium)["value"]
+
+        # Añade la obra a list_Medium_artworks.
+        lt.addLast(list_Medium_artworks, artwork)
+
+
+    # Si no existe la pareja llave-valor.
+    else:
+
+        # Crear una nueva lista de las obras creados con param_Medium.
+        new_list_Medium_artists = lt.newList('SINGLE_LINKED')
+        
+        # Añade la obra a new_list_Medium_artists.
+        lt.addLast(new_list_Medium_artists, artwork)
+
+        # Añade la pareja técnica-lista_obras al map.
+        mp.put(map_Medium, param_Medium, new_list_Medium_artists)
+
+
+
+# Función que agrega una pareja llave-valor al map "Nationality".
+def add_Nationality (catalog: dict, param_Nacion: str, artwork: dict) -> None:
+    """
+        Esta función permite agregar una pareja llave-valor al map "Nationality" del catálogo.
+        
+        La llave deberá ser una nacionalidad, es decir, una cadena de caracteres.
+        El valor será una lista enlazada, cuyos elementos son diccionarios que
+        representan a cada obra (para más detalle de la información contienen estos
+        diccionarios, revisar la documentación de la función new_artwork()).
+
+        En caso de que la pareja nacionalidad-lista_obras ya exista, se añadirá la obra a lista_obras.
+        En caso de que la pareja nacionalidad-lista_obras no exitsa, se creará la lista que contiene a las
+        obras con dicha nacionalidad, se añadirá la información de la obra a dicha lista
+        y se añadirá la nueva pareja nacionalidad-lista_obras al map "Nationality" del catálogo.
+
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_Nacion (str): llave referente a una nacionalidad.
+            -> artwork (dict): diccionario que representa al artista que se quiere añadir.
+
+        No tiene retorno.
+
+    """
+
+    # Crear variable que guarda el mapa "Nationality" del catálogo.
+    map_Nationality = catalog["Nationality"]
+
+    # Determinar si la pareja llave-valor ya existe.
+    exists = mp.contains(map_Nationality, param_Nacion)
+
+
+    # Si ya existe la pareja llave-valor.
+    if (exists):
+
+        # Crear variable que guarda la lista de las obras cuya nacionalidad es param_Nacion.
+        list_Nationality_artworks = mp.get(map_Nationality, param_Nacion)["value"]
+
+        # Añade la obra a list_Nationality_artworks.
+        lt.addLast(list_Nationality_artworks, artwork)
+
+
+    # Si no existe la pareja llave-valor.
+    else:
+
+        # Crear una nueva lista de las obras cuya nacionalidad es param_Nacion.
+        new_list_Nationality_artworks = lt.newList('SINGLE_LINKED')
+        
+        # Añade la obra a new_list_Nationality_artworks.
+        lt.addLast(new_list_Nationality_artworks, artwork)
+
+        # Añade la pareja nacionalidad-lista_obras al map.
+        mp.put(map_Nationality, param_Nacion, new_list_Nationality_artworks)
+
+
+
+# Función que agrega una pareja llave-valor al map "ConstituentID".
+def add_ConstituentID (catalog: dict, param_ConsID: int, artist: dict) -> None:
+    """
+        Esta función permite agregar una pareja llave-valor al map "add_ConstituentID" del catálogo.
+        
+        La llave deberá ser un ConstituentID, es decir, un número entero mayor que 0.
+        El valor será la información del artista cuyo ConstituentID es igual a la llave.
+
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_ConsID (int): llave referente a un ConstituentID.
+            -> artist (dict): diccionario que representa al artista que se quiere añadir.
+
+        No tiene retorno.
+
+    """
+
+    # Crear variable que guarda el mapa "ConstituentID" del catálogo.
+    map_ConstituentID = catalog["ConstituentID"]
+
+    # Añadir la pareja ConstituentID-artista al map.
+    mp.put(map_ConstituentID, param_ConsID, artist)
 
 
 
@@ -298,7 +458,7 @@ def new_artwork (artwork_info: dict) -> dict:
                "Title": "",
                "ConstituentID": None,
                "Date": "",
-               "Medium": "",
+               "Medium": """""",
                "Classification": "",
                "DateAcquired": "",
                "Circumference (cm)": "",

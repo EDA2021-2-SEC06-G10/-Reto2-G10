@@ -11,28 +11,38 @@ Integrantes:
 
 ##--##--##  General  ##--##--##
 
- 1- Se añadió la sección "funciones requerimientos".
- 2- Se añadió la sección "funciones de comparación".
+ 1- 
 
 
 ##--##--##  Model  ##--##--##
 
- 1- Se definieron las siguientes funciones:
-    -> req_1().
-    -> cmp_BeginDates().
-  
- 2- Se actualizó la función de comparación de la lista "artists" del catálogo en la función new_catalog().
+ 1- Mediante la función new_catalog(), se añadieron tres maps al catálogo: 'Medium', 'Nacionality' y 'ConstituentID'.
+
+ 2- Se importó la librería probehashtable para poder usar la función nextPrime().
+
+ 3- Se definieron las siguientes funciones:
+    -> add_Medium().
+    -> add_Nationality().
+    -> add_ConstituentID().
 
 
 
 ##--##--##  Controller  ##--##--##
 
- 1- 
+ 1- Se modificó la función load_artists() de tal forma que esta permita añadir parejas llave-valor al map 'ConstituentID'.
+
+ 2- Se modificó la función load_artworks() de tal forma que esta permita añadir parejas llave-valor a los maps 'Medium' y 'Nationality'.
 
 
 ##--##--##  View  ##--##--##
  
- 1- 
+ 1- Se importó la librería time para poder realizar las mediciones de tiempo.
+
+ 2- Se modificó la iteración del usuario para que fuese posible calcular el tiempo que se demora en cargar los datos.
+
+ 3- Se modificó la función print_menu() para que considerara una séptima opción, la cual hará referencia al requerimiento extra del laboratorio 6.
+
+ 4- Se importó la librería map.
 
 
 #####-----#####-----#####-----#####   #---#---#   #####-----#####-----#####-----#####
@@ -42,6 +52,10 @@ Integrantes:
 
 ##--##--##  Dudas  ##--##--##
  1- ¿Por qué sale un error de recursión al intentar imprimir la lista de artistas implementada como una lista enlazada?
+
+ 2- ¿Por qué sale un KeyError cuando se intentan cargar los datos del archivo large de los artistas?
+
+ 3- Modificar model y controller de tal forma que los valores de los maps del catálogo hagan referencia a los valores de las listas de artistas y obras, de tal forma que se disminuya el uso del espacio. 
 
 
 ##--##--##  Model  ##--##--##
@@ -53,6 +67,8 @@ Integrantes:
   2- Modificar la función new_artist() de tal forma que los datos desconocidos del artista se guarden como "N.A.".
 
   3- Determinar si la quicksort es el algoritmo más conveniente para ordenar la lista de la función req_1().
+
+  4- Determinar el tamaño adecuado para el map 'Nationality'.
 
 
 

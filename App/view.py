@@ -25,6 +25,8 @@
 #####-----#####-----#####-----#####-----#####-----#####   ####---#####---####   #####-----#####-----#####-----#####-----#####-----#####
 
 import config as cf
+from DISClib.ADT import map as mp
+import time
 import sys
 import controller
 from DISClib.ADT import list as lt
@@ -58,6 +60,7 @@ def print_menu () -> None:
     print("  5- Cargar requerimiento 4.")
     print("  6- Cargar requerimiento 5.")
     print("  6- Cargar requerimiento 6.")
+    print("  7- Cargar requerimiento del lab. 6.")
     print("  0- Salir.")
 
 
@@ -115,6 +118,9 @@ def load_data (catalog: dict) -> None:
 # Crear variable que guardará el catálogo.
 catalog = None
 
+# Crear variables que permitirán medir el tiempo de ejecución de la carga de datos.
+start_time = 0.0
+stop_time = 0.0
 
 
 # Iteración usuario.
@@ -139,17 +145,68 @@ while True:
             # Inicializar catálogo.
             catalog = init_catalog()
 
+            # Iniciar el tiempo.
+            start_time = time.process_time()
+
             # Cargar datos al catálogo.
             load_data(catalog)
 
+            # Parar el tiempo.
+            stop_time = time.process_time()
+
+            # Calcular tiempo de ejecución en milisegundos.
+            elapsed_time_mseg = (stop_time - start_time)*1000
+
             # Imprimir mensaje de éxito.
             print("\n<> Información cargada con éxito. <>")
+            print("Tiempo de demora:", elapsed_time_mseg, "milisegundos.")
 
 
 
         # Si escoge la opción 2.
         elif int(inputs[0]) == 2:
             pass
+
+
+
+        # Si escoge la opción 7.
+        elif int(inputs[0]) == 7:
+
+                # Imprimir mensaje de carga.
+                print("""\n======================= OPCIÓN 7 =======================\n""")
+                
+                # Preguntar al usuario por la nacionalidad.
+                inputs = input('Por favor, escriba la nacionalidad:\n  -> ')
+
+                # Crear variable que guarda el map 'Nationality'.
+                map_Nation = catalog['Nationality']
+
+                # Crear variable que determina si la nacionalidad está o no en el map 'Nationality'.
+                exists = mp.contains(map_Nation, inputs)
+
+
+                # Si la nacionalidad existe.
+                if (exists):
+
+                    # Guardar lista de obras que tienen esa nacionalidad.
+                    artists_list = mp.get(map_Nation, inputs)['value']
+
+                    # Determinar número total de obras de la nacionalidad.
+                    num_artists = lt.size(artists_list)
+
+                    # Imprimir respuesta.
+                    print("\n<> Respuesta <>")
+                    print("El número total de obras cuyo/s autor/es tiene/n nacionalidad", "'" + str(inputs) + "'", "es:", str(num_artists) + ".")
+
+
+                # Si se ingresa un valor erróneo.
+                else:
+                    print("""\n======================= ERROR =======================\n""")
+                    print("Debe ingresar una nacionalidad válida.\n\n")
+                    sys.exit(0)
+
+
+
 
 
         # Si escoge la opción 0.

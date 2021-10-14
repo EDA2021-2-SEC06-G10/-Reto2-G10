@@ -103,7 +103,7 @@ def load_artists (catalog: dict) -> None:
     """
 
     # Crear variable que guarda la referencia al archivo de los artistas.
-    artists_file = cf.data_dir + '\\MoMA\\Artists-utf8-small.csv'
+    artists_file = cf.data_dir + '\\MoMA\\Artists-utf8-80pct.csv'
 
     # Crear variable que guarda todos los artistas.
     input_file = csv.DictReader(open(artists_file, encoding='utf-8'))
@@ -115,12 +115,24 @@ def load_artists (catalog: dict) -> None:
         # Añadirlo a la lista 'artists' del catálogo.
         model.add_artist(catalog, artist_info)
 
+
         # Determinar su año de nacimiento.
         artists_BegDat = int(float(artist_info["BeginDate"]))
 
         # Añadirlo al map "BeginDate" si su año de nacimiento está registrado.
         if not (artists_BegDat == 0):
             model.add_BeginDate(catalog, artists_BegDat, artist_info)
+
+
+        # Determinar su ConstituentID.
+        artist_ConsID = artist_info["ConstituentID"]
+
+        # Añadirlo al map "ConstituentID" si su ConstituentID es diferente de "".
+        if not (artist_ConsID == ""):
+
+            # Convertir el ConstituentID a un entero y añadir la pareja al map 'ConstituentID'.
+            artist_ConsID = int(float(artist_info["ConstituentID"]))
+            model.add_ConstituentID(catalog, artist_ConsID, artist_info)
 
 
 
@@ -141,16 +153,64 @@ def load_artworks (catalog: dict) -> None:
     """
 
     # Crear variable que guarda la referencia al archivo de las obras.
-    artworks_file = cf.data_dir + '\\MoMA\\Artworks-utf8-small.csv'
+    artworks_file = cf.data_dir + '\\MoMA\\Artworks-utf8-80pct.csv'
 
     # Crear variable que guarda todas las obras.
     input_file = csv.DictReader(open(artworks_file, encoding='utf-8'))
 
     # Añadir cada obra al catálogo.
     for artwork_info in input_file:
+        
+        # Añadirlo a la lista 'artworks' del catálogo.
         model.add_artwork(catalog, artwork_info)
 
 
+        # Crear variable que guarda su técnica.
+        artwork_Medium = artwork_info["Medium"]
+
+        # Añadir la pareja llave-valor al map 'Medium' si su técnica está registrada.
+        if not (artwork_Medium == ""):
+            model.add_Medium(catalog, artwork_Medium, artwork_info)
+
+        
+        # Crear variable que guarda la lista de los ConstituentID de los autores de la obra y hacer
+        #  una lista de Python con estos.
+        artwork_ConstituentID = artwork_info["ConstituentID"]
+        ConstituentID_list = (artwork_ConstituentID[1 : len(artwork_ConstituentID) - 1]).split(',')
+        
+        # Crear variable que guardará la llave referente a la nacionalidad de la obra.
+        new_Nacion_key = ""
+
+        # Crear variable que guarda el mapa 'ConstituentID'.
+        map_ConstituentID = catalog["ConstituentID"]
+
+        # Recorrer la lista que contiene los ConstituentID de la obra.
+        for ConstituentID in ConstituentID_list:
+            
+            # Si el ConstituentID actual no es una cadena vacía.
+            if not (ConstituentID == ""):
+
+                # Convertir el ConstituentID a un entero.
+                ConstituentID_key = int(float(ConstituentID))
+
+                # Determinar si la llave ConstituentID_key está en el mapa 'ConstituentID_key'.
+                exists = mp.contains(map_ConstituentID, ConstituentID_key)
+
+
+                # Si la llave existe.
+                if (exists):
+                    
+                    # Crear variable que guarda la información del artista identificado con ConstituentID_key
+                    # y guardar su nacionalidad.
+                    info_artist = mp.get(map_ConstituentID, ConstituentID_key)["value"]
+                    artists_nacion = info_artist["Nationality"]
+
+                    # Concatenar la nacionalidad del artista actual con las demás nacionalidades.
+                    new_Nacion_key += artists_nacion
+
+
+        # Añadir la pareja llave-valor al map 'Nationality'.
+        model.add_Nationality(catalog, new_Nacion_key, artwork_info)
 
 
 
@@ -168,7 +228,23 @@ def load_artworks (catalog: dict) -> None:
 
 
 
-# Pruebas.
+# Pruebas lab. 6.
+
+'''
+
+catalog = init_catalog()
+load_data(catalog)
+
+mapa_que_necesito = catalog['Nationality']
+var = lt.size(mp.get(mapa_que_necesito, "UkrainianRussian")['value'])
+print(var)
+
+'''
+
+
+
+'''
+# Pruebas req.1.
 
 catalog = init_catalog()
 load_data(catalog)
@@ -193,3 +269,4 @@ iterador_elem_lista = lt.iterator(lista_acual)
 for elemento in iterador_elem_lista:
     print(elemento)
 """
+'''
