@@ -110,14 +110,14 @@ def load_artists (catalog: dict) -> None:
 
 
     # Iterar sobre cada artista del catálogo.
-    for artist_info in input_file:
+    for artist in input_file:
         
-        # Añadirlo a la lista 'artists' del catálogo.
-        model.add_artist(catalog, artist_info)
+        # Crear un artista con la información de la iteración actual.
+        artist_info = model.new_artist(artist)
 
 
         # Determinar su año de nacimiento.
-        artists_BegDat = int(float(artist_info["BeginDate"]))
+        artists_BegDat = artist_info["BeginDate"]
 
         # Añadirlo al map "BeginDate" si su año de nacimiento está registrado.
         if not (artists_BegDat == 0):
@@ -130,8 +130,7 @@ def load_artists (catalog: dict) -> None:
         # Añadirlo al map "ConstituentID" si su ConstituentID es diferente de "".
         if not (artist_ConsID == ""):
 
-            # Convertir el ConstituentID a un entero y añadir la pareja al map 'ConstituentID'.
-            artist_ConsID = int(float(artist_info["ConstituentID"]))
+            # Añadir la pareja al map 'ConstituentID'.
             model.add_ConstituentID(catalog, artist_ConsID, artist_info)
 
 
@@ -159,10 +158,10 @@ def load_artworks (catalog: dict) -> None:
     input_file = csv.DictReader(open(artworks_file, encoding='utf-8'))
 
     # Añadir cada obra al catálogo.
-    for artwork_info in input_file:
-        
-        # Añadirlo a la lista 'artworks' del catálogo.
-        model.add_artwork(catalog, artwork_info)
+    for artwork in input_file:
+
+        # Crear una obra con la información de la iteración actual.
+        artwork_info = model.new_artwork(artwork)
 
 
         # Crear variable que guarda su técnica.
@@ -173,10 +172,8 @@ def load_artworks (catalog: dict) -> None:
             model.add_Medium(catalog, artwork_Medium, artwork_info)
 
         
-        # Crear variable que guarda la lista de los ConstituentID de los autores de la obra y hacer
-        #  una lista de Python con estos.
-        artwork_ConstituentID = artwork_info["ConstituentID"]
-        ConstituentID_list = (artwork_ConstituentID[1 : len(artwork_ConstituentID) - 1]).split(',')
+        # Crear variable que guarda la lista de los ConstituentID de los autores de la obra.
+        ConstituentID_list = artwork_info["ConstituentID"]
         
         # Crear variable que guardará la llave referente a la nacionalidad de la obra.
         new_Nacion_key = ""
@@ -213,6 +210,14 @@ def load_artworks (catalog: dict) -> None:
         model.add_Nationality(catalog, new_Nacion_key, artwork_info)
 
 
+        # Crear variable que guarda la fecha de adquicisión de la obra.
+        artwork_DateAcquired = artwork_info["DateAcquired"]
+
+        # Añadir la pareja llave-valor al map 'DateAcquired' si su fecha de adquicisión está registrada.
+        if not (artwork_DateAcquired == ""):
+            model.add_DateAcquired(catalog, artwork_DateAcquired, artwork_info)
+
+
 
 
 
@@ -231,16 +236,30 @@ def load_artworks (catalog: dict) -> None:
 # Pruebas lab. 6.
 
 '''
-
 catalog = init_catalog()
 load_data(catalog)
 
-mapa_que_necesito = catalog['Nationality']
-var = lt.size(mp.get(mapa_que_necesito, "UkrainianRussian")['value'])
-print(var)
+cosa_que_necesito = catalog['Nationality']
+lista = lt.iterator(mp.keySet(cosa_que_necesito))
 
+for nacion in lista:
+    print(nacion)
 '''
 
+'''
+# Crear variable de retorno.
+less_than = False
+
+# Crear variables con las fechas de adquisición modificadas.
+mod_DateAcquired_1 = date.datetime.strptime('2021-10-10', '%Y-%m-%d')
+mod_DateAcquired_2 = date.datetime.strptime('1991-10-10', '%Y-%m-%d')
+
+# Determinar si es menor.
+if mod_DateAcquired_1 > mod_DateAcquired_2:
+    less_than = True
+
+print(less_than)
+'''
 
 
 '''
@@ -257,6 +276,7 @@ print(lt.getElement(resp, 3)["ConstituentID"], lt.getElement(resp, 3)["BeginDate
 print(lt.getElement(resp, lt.size(resp) - 2)["ConstituentID"], lt.getElement(resp, lt.size(resp) - 2)["BeginDate"])
 print(lt.getElement(resp, lt.size(resp) - 1)["ConstituentID"], lt.getElement(resp, lt.size(resp) - 1)["BeginDate"])
 print(lt.getElement(resp, lt.size(resp))["ConstituentID"], lt.getElement(resp, lt.size(resp))["BeginDate"])
+'''
 
 """
 # Mapa BeginDate.
@@ -269,4 +289,20 @@ iterador_elem_lista = lt.iterator(lista_acual)
 for elemento in iterador_elem_lista:
     print(elemento)
 """
-'''
+
+#'''
+# Pruebas req 2.
+catalog = init_catalog()
+load_data(catalog)
+
+resp = model.req_2(catalog, '1944-06-06', '1989-11-09')
+print(lt.size(resp[0]), resp[1])
+
+lista = resp[0]
+print(lt.getElement(lista,1)['Title'])
+print(lt.getElement(lista,2)['Title'])
+print(lt.getElement(lista,3)['Title'])
+print(lt.getElement(lista, lt.size(lista) - 2)['Title'])
+print(lt.getElement(lista, lt.size(lista) - 1)['Title'])
+print(lt.getElement(lista, lt.size(lista))['Title'])
+#'''

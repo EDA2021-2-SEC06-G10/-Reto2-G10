@@ -29,6 +29,7 @@
 #####-----#####-----#####-----#####-----#####   ####---#####---####   #####-----#####-----#####-----#####-----#####
 
 import config as cf
+import datetime as date
 from DISClib.DataStructures import probehashtable
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
@@ -55,14 +56,6 @@ assert cf
 def new_catalog () -> dict:
     """
         Esta función permite crear la estructura de datos que guarda el catálogo del museo.
-        
-        Crea dos listas vacías que permitirán guardar los siguientes elementos:
-         1- Los artistas.
-         2- Las obras.
-
-        Además, la función crea los siguientes maps, los cuales guardarán información de interés de cada grupo de elementos:
-         1- Mediums: guarda la información de las obras que fueron creadas usando la técnica de la llave respectiva.
-
 
         No tiene parámetros.
 
@@ -72,38 +65,29 @@ def new_catalog () -> dict:
     """
 
     # Definir variable que guarda la información del catálogo e inicializar las parejas llave-valor.
-    catalog = {'artists': None,
-               'artworks': None,
-               'BeginDate': None,
+    catalog = {'BeginDate': None,
                'Medium': None,
                'Nationality': None,
-               'ConstituentID': None}
+               'ConstituentID': None,
+               'DateAcquired': None}
+    
 
 
-    #####-----#####-----#####-----#####   Definición Listas de Elementos   #####-----#####-----#####-----#####
+    #####-----#####-----#####   Definición Listas   #####-----#####-----#####
+
     """
-        La siguiente lista contiene la información de todos los artistas encontrados en  los archivos de carga.
-        Estos no están ordenadas bajo ningún criterio, y son referenciados por los índices que se definirán en 
-        seguida.
+        A continuacion se crearán listas cuyos elementos serán diccionarios que representan
+        artistas u obras que cumplen alguna caracterísitca particular.
 
-        Cada artista se representa mediante un diccionario, cuyas parejas llave-valor representan información
-        relevante de cada artista (como su nombre, id, fecha de nacimiento, entre otros). Toda la información
-        que se guarda de cada artista se especfica detalladamente en la función new_artist(). 
+        Es importante notar que todas las listas referencian a la misma información;
+        es decir, si en una lista se guarda la información de una obra y en otra también,
+        ambas están referenciando al mismo espacio en memoria, mas no se está copiando
+        dos veces la misma información. Esto se debe a la inmutabilidad del tipo de dato
+        dict de Python.
     
     """
-    catalog['artists'] = lt.newList('SINGLE_LINKED', cmpfunction = cmp_BeginDates)
-    
-    """
-        La siguiente lista contiene la información de todas las obras encontradas en  los archivos de carga.
-        Estas no están ordenadas bajo ningún criterio, y son referenciadas por los índices que se definirán en 
-        seguida.
 
-        Cada obra se representa mediante un diccionario, cuyas parejas llave-valor representan información
-        relevante de cada obra (como su título, los id de sus autores, entre otros). Toda la información
-        que se guarda de cada obra se especfica detalladamente en la función new_artwork(). 
-    
-    """
-    catalog['artworks'] = lt.newList('SINGLE_LINKED')            # Pendiente añadir función de comparación.
+
 
 
     #####-----#####-----#####   Definición Maps/Índices   #####-----#####-----#####
@@ -111,6 +95,12 @@ def new_catalog () -> dict:
     """
         A continuacion se crearán maps por diferentes criterios
         para llegar a la información requerida en tiempo constante.
+
+        Es importante notar que todos los maps referencian a la misma información;
+        es decir, si en un map se guarda la información de una obra y en otro también,
+        ambos están referenciando al mismo espacio en memoria, mas no se está copiando
+        dos veces la misma información. Esto se debe a la inmutabilidad del tipo de dato
+        dict de Python.
     
     """
 
@@ -122,19 +112,25 @@ def new_catalog () -> dict:
     # Map cuyas llaves son las técnicas y cuyos valores son listas enlazadas que contienen
     # información relevante de las obras que fueron creadas usando dicha técnica.
     # El tamaño del mapa se asignó como el siguiente primo a 146.100, ya que esta es la cantidad de obras que hay.
-    catalog["Medium"] = mp.newMap(probehashtable.nextPrime(146100/0.8), maptype='PROBING', loadfactor=0.8)
+    catalog["Medium"] = mp.newMap(probehashtable.nextPrime(146100), maptype='CHAINING', loadfactor=4.0)
 
 
     # Map cuyas llaves son las nacionalidades y cuyos valores son listas enlazadas que contienen
     # información relevante de las obras cuyo/s autor/es tiene/n dicha nacionalidad.
     # El tamaño del mapa se asignó como el siguiente primo a 200, porque hay 194 países reconocidos
     # por la ONU y se añadieron 6 espacios extra para evitar re-hashing (en la medida de lo posible).
-    catalog["Nationality"] = mp.newMap(probehashtable.nextPrime(200/0.8), maptype='PROBING', loadfactor=0.8)
+    catalog["Nationality"] = mp.newMap(probehashtable.nextPrime(200/0.5), maptype='PROBING', loadfactor=0.5)
 
 
     # Map cuyas llaves son ConstituentID's y cuyos valores son el artista reconocido con dicho ConstituentID.
     # El tamaño del mapa se asignó como el siguiente primo a 15.224 porque hay 15.224 artistas en el catálogo.
     catalog["ConstituentID"] = mp.newMap(probehashtable.nextPrime(15224), maptype='CHAINING', loadfactor=4.0)
+
+
+    # Map cuyas llaves son fechas de adquisición (DateAcquired) y cuyos valores son listas enlazadas que contienen
+    # información relevante de las obras cuya fecha de adquisición es equivalente a la llave.
+    # El tamaño del mapa se asignó como el siguiente primo a 146100 porque esa es la cantidad de obras en el catálogo.
+    catalog["DateAcquired"] = mp.newMap(probehashtable.nextPrime(146100), maptype='CHAINING', loadfactor=4.0)
 
 
 
@@ -153,49 +149,6 @@ def new_catalog () -> dict:
     Se definen las funciones que permitirán añadir elementos al catálogo.
 
 """
-
-# Función que agrega un artista al catálogo.
-def add_artist (catalog: dict, artist_info: dict) -> None:
-    """
-        Esta función permite crear y agregar un artista al catálogo usando la información
-        pasada por parámetro y guardándolo en la lista "artists".
-
-        Parámetros:
-            -> catalog (dict): catálogo.
-            -> artist_info (dict): información del artista que se quiere adicionar. 
-
-        No tiene retorno.
-
-    """
-    
-    # Crear un artista con los datos ingresados por parámetro.
-    artist_new = new_artist(artist_info)
-
-    # Agregar el artista a la última posición de la lista "artists".
-    lt.addLast(catalog['artists'], artist_new)
-
-
-
-# Función que agrega una obra al catálogo.
-def add_artwork (catalog: dict, artwork_info: dict) -> None:
-    """
-        Esta función permite agregar una obra al catálogo, guardándolo en el arreglo 'obras'.
-
-        Parámetros:
-            -> catalog (dict): catálogo.
-            -> artwork_info (dict): obra que se quiere adicionar. 
-
-        No tiene retorno.
-
-    """
-    
-    # Crear una obra con los datos ingresados por parámetro.
-    artwork_new = new_artwork(artwork_info)
-
-    # Agregar la obra a la última posición de la lista "obras".
-    lt.addLast(catalog['artworks'], artwork_new)
-
-
 
 # Función que agrega una pareja llave-valor al map "BeginDate".
 def add_BeginDate (catalog: dict, param_BeginDate: int, artist: dict) -> None:
@@ -392,6 +345,62 @@ def add_ConstituentID (catalog: dict, param_ConsID: int, artist: dict) -> None:
 
 
 
+# Función que agrega una pareja llave-valor al map "DateAcquired".
+def add_DateAcquired (catalog: dict, param_Date: str, artwork: dict) -> None:
+    """
+        Esta función permite agregar una pareja llave-valor al map "DateAcquired" del catálogo.
+        
+        La llave deberá ser una fecha de adquisición, es decir, una cadena de caracteres.
+        El valor será una lista enlazada, cuyos elementos son diccionarios que
+        representan a cada obra (para más detalle de la información contienen estos
+        diccionarios, revisar la documentación de la función new_artwork()).
+
+        En caso de que la pareja DateAcquired-lista_orbas ya exista, se añadirá la obra a lista_obras.
+        En caso de que la pareja DateAcquired-lista_obras no exitsa, se creará la lista que contiene a las
+        obras que se adquirieron en DateAcquired, se añadirá la información de la obra a dicha lista
+        y se añadirá la nueva pareja DateAcquired-lista_obras al map "DateAcquired" del catálogo.
+
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_Date (str): llave referente a una fecha de adquisición.
+            -> artwork (dict): diccionario que representa a la obra que se quiere añadir.
+
+        No tiene retorno.
+
+    """
+
+    # Crear variable que guarda el mapa "DateAcquired" del catálogo.
+    map_DateAcquired = catalog["DateAcquired"]
+
+    # Determinar si la pareja llave-valor ya existe.
+    exists = mp.contains(map_DateAcquired, param_Date)
+
+
+    # Si ya existe la pareja llave-valor.
+    if (exists):
+
+        # Crear variable que guarda la lista de las obras que fueron adquiridas en dicha fecha.
+        list_DateAcquired_artworks = mp.get(map_DateAcquired, param_Date)["value"]
+
+        # Añade la obra a list_DateAcquired_artworks.
+        lt.addLast(list_DateAcquired_artworks, artwork)
+
+
+    # Si no existe la pareja llave-valor.
+    else:
+
+        # Crear una nueva lista de las obras que fueron adquiridas en param_Date.
+        new_list_DateAcquired_artists = lt.newList('SINGLE_LINKED')
+        
+        # Añade la obra a new_list_DateAcquired_artists.
+        lt.addLast(new_list_DateAcquired_artists, artwork)
+
+        # Añade la pareja DateAcquired-lista_obras al map.
+        mp.put(map_DateAcquired, param_Date, new_list_DateAcquired_artists)
+
+
+
 
 #####-----#####-----#####-----#####-----#####   ###---####----###   #####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####   CREACIÓN DE DATOS   #####-----#####-----#####-----#####-----#####
@@ -458,7 +467,9 @@ def new_artwork (artwork_info: dict) -> dict:
                "Title": "",
                "ConstituentID": None,
                "Date": "",
-               "Medium": """""",
+               "Medium": "",
+               "Dimensions": "",
+               "CreditLine": "",
                "Classification": "",
                "DateAcquired": "",
                "Circumference (cm)": "",
@@ -540,6 +551,48 @@ def cmp_BeginDates (artists_1: dict, artists_2: dict) -> bool:
 
 
 
+# Función para comparar dos obras según su fecha de adquisición.
+def cmp_by_DateAcquired (artwork_1: dict, artwork_2: dict) -> bool:
+    """
+        Esta función determina si la fecha de adquisición de artwork_1 es menor que
+        la de artwork_2.
+
+        Parámetros:
+            -> artwork_1: información de la primera obra.
+            -> artwork_2: información de la segunda obra.
+        
+        Retorno:
+            -> (bool): True si la fecha de adquisición de obra_1 es menor que la de obra_2.
+                       False de lo contrario.
+    
+    """
+
+    # Crear variable de retorno.
+    less_than = False
+
+    # Crear variables que guardan las fechas.
+    DateAcquired_1 = artwork_1["DateAcquired"]
+    DateAcquired_2 = artwork_2["DateAcquired"]
+
+    # Si las obras no tienen fecha de adquisición.
+    if DateAcquired_1 == "":
+        DateAcquired_1 = "0001-01-01"
+    if DateAcquired_2 == "":
+        DateAcquired_1 = "0001-01-01"
+
+    # Crear variables con las fechas de adquisición modificadas.
+    mod_DateAcquired_1 = date.datetime.strptime(DateAcquired_1, '%Y-%m-%d')
+    mod_DateAcquired_2 = date.datetime.strptime(DateAcquired_2, '%Y-%m-%d')
+
+    # Determinar si es menor.
+    if mod_DateAcquired_1 < mod_DateAcquired_2:
+        less_than = True
+    
+    # Retornar respuesta.
+    return (less_than)
+
+
+
 
 #####-----#####-----#####-----#####-----#####   #####---#######----#####   #####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####   FUNCIONES REQUERIMIENTOS   #####-----#####-----#####-----#####-----#####
@@ -554,8 +607,9 @@ def cmp_BeginDates (artists_1: dict, artists_2: dict) -> bool:
 # Función del requerimiento 1.
 def req_1 (catalog: dict, first_year: int, last_year: int) -> dict:
     """
-        Esta función permite convertir la cadena de texto que guarda los id de los artistas que crearon
-        una obra en una lista.
+        Esta función retorna una listas cronológicamente ordenada que contiene auqellos artistas
+        que nacieron dentro de un rango de años indicado por el usuario.
+
 
         Parámetros:
             -> catalog (dict): catálogo.
@@ -563,7 +617,7 @@ def req_1 (catalog: dict, first_year: int, last_year: int) -> dict:
             -> last_year (int): año final.
 
         Retorno:
-            -> (dict): diccionarios que representa la lista que contiene la respuesta.
+            -> (dict): diccionario que representa la lista que contiene la respuesta.
 
     """
 
@@ -598,6 +652,78 @@ def req_1 (catalog: dict, first_year: int, last_year: int) -> dict:
     # Retornar la lista ordenada.
     return ordered_list
 
+
+
+# Función del requerimiento 2.
+def req_2 (catalog: dict, first_date: str, last_date: str) -> tuple:
+    """
+        Dado un rango de fechas, esta función retorna una tupla que contiene lista cronológicamente ordenada 
+        que almacena las obras que fueron compradas por el museo durante dicho rango de tiempo y la cantidad 
+        de obras que fueron adquiridas por compra.
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> first_date (str): fecha inicial.
+            -> last_date (str): fecha final.
+
+        Retorno:
+            -> (tuple): tupla cuyo primer elemento es la lista que contiene la respuesta
+                        y cuyo segundo elemento representa la cantidad de obras que fueron
+                        adquiridas por compra.
+
+    """
+
+    # Crear lista y entero de retorno.
+    ordered_list = lt.newList("SINGLE_LINKED")
+    num_purch = 0
+
+    # Crear variable que guarda el mapa 'DateAcquired' del catálogo.
+    map_DateAcquired = catalog['DateAcquired']
+
+    # Crear variables con las fechas de adquisición modificadas.
+    mod_first_date = date.datetime.strptime(first_date, '%Y-%m-%d')
+    mod_last_date = date.datetime.strptime(last_date, '%Y-%m-%d')
+
+    # Crear lista que contiene las llaves de map_DateAcquired.
+    keys_map_DateAcquired = lt.iterator(mp.keySet(map_DateAcquired))
+
+
+    # Iterar sobre todas las llaves de keys_map_DateAcquired.
+    for DateAcquired in keys_map_DateAcquired:
+
+        # Crear variables con el DateAcquired de la iteración actual modificada.
+        mod_DateAcquired = date.datetime.strptime(DateAcquired, '%Y-%m-%d')
+
+        # Crear variable que determina si mod_DateAcquired se encuentra dentro del rango.
+        in_range = (mod_DateAcquired >= mod_first_date and mod_DateAcquired <= mod_last_date)
+
+
+        # Si está en el rango.
+        if (in_range):
+
+            # Crear variable que guarda la lista de obras (el valor) de la llave DateAcquired.
+            list_DateAcquired = lt.iterator(mp.get(map_DateAcquired, DateAcquired)['value'])
+
+            # Iterar sobre las obras de list_DateAcquired.
+            for artwork in list_DateAcquired:
+                
+                # Añadir la obra a la lista de retorno.
+                lt.addLast(ordered_list, artwork)
+
+                # Guardar línea de crédito de la obra, determinar si es igual a 'Purchase' y, si lo es,
+                # aumentar num_purch en 1.
+                artwork_CreditLine = artwork['CreditLine']
+                is_purchase = (artwork_CreditLine == 'Purchase')
+                if (is_purchase):
+                    num_purch += 1
+
+    # Ordenar lista.
+    ordered_ordered_list = qui.sort(ordered_list, cmp_by_DateAcquired)
+        
+    # Retornar tupla.
+    return (ordered_ordered_list, num_purch)
+
+        
     
 
 

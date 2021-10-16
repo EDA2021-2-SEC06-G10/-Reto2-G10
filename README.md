@@ -16,33 +16,30 @@ Integrantes:
 
 ##--##--##  Model  ##--##--##
 
- 1- Mediante la función new_catalog(), se añadieron tres maps al catálogo: 'Medium', 'Nacionality' y 'ConstituentID'.
+ 1- Se modificó la función new_artwork() de tal forma que fuese posible saber el CreditLine y las Dimensions de cada obra.
 
- 2- Se importó la librería probehashtable para poder usar la función nextPrime().
+ 2- Se modificó la función new_catalog() para añadir al catálogo el map 'DateAcquired'. Además, se borraron de esta las listas 'artists' y 'artworks', ya que estas no servían propósito alguno.
 
- 3- Se definieron las siguientes funciones:
-    -> add_Medium().
-    -> add_Nationality().
-    -> add_ConstituentID().
+ 3- Teniendo en cuenta esto último, se eliminaros las funciones add_artist() y add_artwork(), ya que tampoco servían para nada.
+
+ 4- Se definieron las siguientes funciones:
+    -> add_DateAcquired().
+    -> cmp_by_DateAcquired().
+
+5- Se importó la librería datetime.
 
 
 
 ##--##--##  Controller  ##--##--##
 
- 1- Se modificó la función load_artists() de tal forma que esta permita añadir parejas llave-valor al map 'ConstituentID'.
+ 1- Se modificó la función load_artworks() de tal forma que siempre que se añada información de una obra se haga referencia al mismo diccionario que representa dicha usando la función model.new_artwork(). 
 
- 2- Se modificó la función load_artworks() de tal forma que esta permita añadir parejas llave-valor a los maps 'Medium' y 'Nationality'.
+ 2- Se modificó la función load_artworks() para que se pudiesen añadir parejas llave-valor al map 'DateAcquired'.
 
 
 ##--##--##  View  ##--##--##
  
- 1- Se importó la librería time para poder realizar las mediciones de tiempo.
-
- 2- Se modificó la iteración del usuario para que fuese posible calcular el tiempo que se demora en cargar los datos.
-
- 3- Se modificó la función print_menu() para que considerara una séptima opción, la cual hará referencia al requerimiento extra del laboratorio 6.
-
- 4- Se importó la librería map.
+ 1- 
 
 
 #####-----#####-----#####-----#####   #---#---#   #####-----#####-----#####-----#####
@@ -55,7 +52,14 @@ Integrantes:
 
  2- ¿Por qué sale un KeyError cuando se intentan cargar los datos del archivo large de los artistas?
 
- 3- Modificar model y controller de tal forma que los valores de los maps del catálogo hagan referencia a los valores de las listas de artistas y obras, de tal forma que se disminuya el uso del espacio. 
+ 3-
+
+
+##--##--##  General  ##--##--##
+
+ 1- Modificar model y controller de tal forma que los valores de los maps del catálogo hagan referencia a los valores de las listas de artistas y obras, de tal forma que se disminuya el uso del espacio.
+
+ 2- Implementar el controller y el view de tal forma que se pueda usar los requerimientos 1 y 2.
 
 
 ##--##--##  Model  ##--##--##
