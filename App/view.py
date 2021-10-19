@@ -66,6 +66,75 @@ def print_menu () -> None:
 
 
 
+# Función que imprime la respuesta del requerimiento 1.
+def print_req_1 (first_year: int, last_year: int, resp_req_1: dict) -> None:
+    """
+        Esta función imprime la respuesta del requerimiento 1 de una manera amigable para el usuario.
+
+        Parámetro:
+            -> first_year (int): primer año del intervalo.
+            -> last_year (int): último año del intervalo.
+            -> resp_req_1 (tuple): lista que contiene las respuestas del requerimiento 1.
+
+        No tiene retorno.
+
+    """
+
+    # Respuesta inicial.
+    print('En total, hay', lt.size(resp_req_1), 'artistas que nacieron entre ' + str(first_year) + ' y ' + str(last_year) + '.')
+
+    # Si hay datos en la lista.
+    if not (lt.size(resp_req_1) == 0):
+
+        print('Una muestra del rango cronológico se dispone a continuación:\n')
+
+        # Header.
+        print("#" * 131)
+        print("# ", end = " ")
+        print(fixed_length('NOMBRE', 40), end = " # ")
+        print(fixed_length('NACIMIENTO', 10), end = " # ")
+        print(fixed_length('FALLECIMIENTO', 13), end = " # ")
+        print(fixed_length('NACIONALIDAD', 30), end = " # ")
+        print(fixed_length('GÉNERO', 21), end = " # ")
+        print()
+        print("#" * 131)
+
+        # Datos tabla.
+        if (lt.size(resp_req_1)) < 6:
+            for element in lt.iterator(resp_req_1):
+                print("# ", end = " ")
+                print(fixed_length(element['DisplayName'], 40), end = " # ")
+                print(fixed_length(str(element['BeginDate']), 10), end = " # ")
+                print(fixed_length(str(element['EndDate']), 13), end = " # ")
+                print(fixed_length(element['Nationality'], 30), end = " # ")
+                print(fixed_length(element['Gender'], 21), end = " # ")
+                print()
+            print("#" * 131)
+
+        else:
+            
+            new_list = lt.newList('SINGLE_LINKED')
+            size_lt_med = lt.size(resp_req_1)
+            lt.addLast(new_list, lt.getElement(resp_req_1, 1))
+            lt.addLast(new_list, lt.getElement(resp_req_1, 2))
+            lt.addLast(new_list, lt.getElement(resp_req_1, 3))
+            lt.addLast(new_list, lt.getElement(resp_req_1, size_lt_med -2))
+            lt.addLast(new_list, lt.getElement(resp_req_1, size_lt_med -1))
+            lt.addLast(new_list, lt.getElement(resp_req_1, size_lt_med))
+
+            for element in lt.iterator(new_list):
+                print("# ", end = " ")
+                print(fixed_length(element['DisplayName'], 40), end = " # ")
+                print(fixed_length(str(element['BeginDate']), 10), end = " # ")
+                print(fixed_length(str(element['EndDate']), 13), end = " # ")
+                print(fixed_length(element['Nationality'], 30), end = " # ")
+                print(fixed_length(element['Gender'], 21), end = " # ")
+                print()
+            print("#" * 131)
+        
+    print()    
+
+
 
 # Función que imprime la respuesta del requerimiento 3.
 def print_req_3 (artist_name: str, resp_req_3: tuple) -> None:
@@ -285,6 +354,57 @@ while True:
 
 
         # Si escoge la opción 4.
+        elif int(inputs[0]) == 2:
+
+            # Limpiar la consola.
+            os.system('cls')
+
+            # Imprimir mensaje de carga.
+            print("""\n======================= Inputs Req. 1 =======================\n""")
+                
+            # Preguntar al usuario por la nacionalidad.
+            inputs_1 = input('Por favor, escriba el año inicial (YYYY):\n  -> ')
+            inputs_2 = input('Por favor, escriba el año final (YYYY):\n  -> ')
+
+            # Transformar datos de entrada.
+            int_inputs_1 = int(inputs_1)
+            int_inputs_2 = int(inputs_2)
+
+
+            # Si el intervalo es válido.
+            if not ((int_inputs_1 >= int_inputs_2) or (int_inputs_1 <= 0 or int_inputs_2 <= 0) or (int_inputs_2 > 2018)):
+
+                # Imprimir mensaje de carga.
+                print("""\n====================== Outputs Req. 1 =======================\n""")
+
+                # Iniciar el tiempo.
+                start_time = time.process_time()
+
+                # Guardar respuesta del requerimiento 3.
+                resp_req_1 = controller.req_1(catalog, int(inputs_1), int(inputs_2))
+
+                # Parar el tiempo.
+                stop_time = time.process_time()
+
+                # Calcular tiempo de ejecución en milisegundos e imprimirlo.
+                elapsed_time_mseg = (stop_time - start_time)*1000
+                print("Tiempo de ejecución del requerimiento:", elapsed_time_mseg, "milisegundos.\n")
+
+                # Imprimir respuesta.
+                print_req_1(inputs_1, inputs_2, resp_req_1)
+
+
+            # De lo contrario.
+            else:
+                
+                # Imprimir mensaje de error.
+                print("""\n======================= ERROR =======================\n""")
+                print("Debe ingresar un intervalo válido. Intente de nuevo.\n")
+                sys.exit(0)
+
+
+
+        # Si escoge la opción 4.
         elif int(inputs[0]) == 4:
             
             # Limpiar la consola.
@@ -321,8 +441,6 @@ while True:
 
                 # Imprimir respuesta.
                 print_req_3(inputs, resp_req_3)
-
-                sys.exit(0)
 
             
             # De lo contrario.

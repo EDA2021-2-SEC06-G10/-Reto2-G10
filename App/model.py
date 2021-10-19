@@ -539,6 +539,18 @@ def new_artist (artist_info: dict) -> dict:
     artist["BeginDate"] = int(float(artist_info["BeginDate"]))
     artist["EndDate"] = int(float(artist_info["EndDate"]))
 
+    # Actualizar datos desconocidos.
+    if artist["DisplayName"] == "":
+        artist["DisplayName"] = "N.A."
+    if artist["BeginDate"] == 0:
+        artist["BeginDate"] = "N.A."
+    if artist["EndDate"] == 0:
+        artist["EndDate"] = "N.A."
+    if artist["Nationality"] == "":
+        artist["Nationality"] = "N.A."
+    if artist["Gender"] == "":
+        artist["Gender"] = "N.A."
+
     # Retornar al artista.
     return artist
 
@@ -770,30 +782,27 @@ def req_1 (catalog: dict, first_year: int, last_year: int) -> dict:
     interval = range(first_year, last_year + 1)
 
     # Crear lista que contendrá a los artistas que nacieron dentro de interval.
-    return_list = lt.newList("ARRAY_LIST")
-
     # Guardar el map "BeginDate" del catálogo.
+    return_list = lt.newList("ARRAY_LIST")
     map_BeginDate = catalog["BeginDate"]
 
 
     # Iterar sobre cada año que se encuentra dentro de interval.
     for year in interval:
         
-        # Guardar la lista de los artistas que nacieron durante year.
-        artists_list = mp.get(map_BeginDate, year)["value"]
+        # Si el año se encuentra en el mapa map_BeginDate.
+        if (mp.get(map_BeginDate, year) != None):
 
-        # Crear lista con los elementos de artists_list.
-        iter_artists_list = lt.iterator(artists_list)
+            # Guardar la lista de los artistas que nacieron durante year.
+            artists_list = mp.get(map_BeginDate, year)["value"]
 
-        # Añadir cada artista a return_list.
-        for artist in iter_artists_list:
-            lt.addLast(return_list, artist)
+            # Añadir cada artista a return_list.
+            for artist in (lt.iterator(artists_list)):
+                lt.addLast(return_list, artist)
 
 
-    # Ordenar lista cronológicamente (es decir, según los BeginDates).
+    # Ordenar lista cronológicamente según los BeginDates y retornarla.
     ordered_list = qui.sort(return_list, cmp_BeginDates)
-
-    # Retornar la lista ordenada.
     return ordered_list
 
 
