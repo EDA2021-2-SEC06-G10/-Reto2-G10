@@ -24,6 +24,7 @@
 #####-----#####-----#####-----#####-----#####-----#####   IMPORTACIÓN MÓDULOS   #####-----#####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####-----#####   ####---#####---####   #####-----#####-----#####-----#####-----#####-----#####
 
+import os
 import config as cf
 from DISClib.ADT import map as mp
 import time
@@ -52,16 +53,111 @@ def print_menu () -> None:
 
     """
 
-    print("""\n\n======================= BIENVENIDO =======================\n""")
+    print("""\n======================= BIENVENIDO =======================\n""")
     print("  1- Cargar información al catálogo.")
     print("  2- Cargar requerimiento 1.")
     print("  3- Cargar requerimiento 2.")
     print("  4- Cargar requerimiento 3.")
     print("  5- Cargar requerimiento 4.")
     print("  6- Cargar requerimiento 5.")
-    print("  6- Cargar requerimiento 6.")
-    print("  7- Cargar requerimiento del lab. 6.")
+    print("  7- Cargar requerimiento 6.")
+    print("  8- Cargar requerimiento del lab. 6.")
     print("  0- Salir.")
+
+
+
+
+# Función que imprime la respuesta del requerimiento 3.
+def print_req_3 (artist_name: str, resp_req_3: tuple) -> None:
+    """
+        Esta función imprime la respuesta del requerimiento 3 de una manera amigable para el usuario.
+
+        Parámetro:
+            -> artist_name (str): nombre del artista.
+            -> resp_req_3 (tuple): tupla que contiene las respuestas del requerimiento 3.
+
+        No tiene retorno.
+
+    """
+
+    # Desempaquetar resp_req_3.
+    total_artworks, total_mediums, most_used_medium, list_most_used_medium, ordered_list_most_used_medium = resp_req_3
+
+
+    # Primera parte.
+    print(artist_name, 'tiene ' + str(total_artworks) + ' obras a su nombre en el museo.')
+    print('Él/ella ha usado ' + str(total_mediums) + ' técnicas diferentes para crear sus obras.')
+    print('\nLa lista de sus técnicas más usadas es la siguiente:\n')
+
+
+    # Tabla técnicas más usadas.
+    print("#" * 56)
+    print("# ", end = " ")
+    print(fixed_length('TÉCNICA', 40), end = " # ")
+    print(fixed_length('CANTIDAD', 8), end = " # ")
+    print()
+    print("#" * 56)
+    if (lt.size(ordered_list_most_used_medium)) < 5:
+        for element in lt.iterator(ordered_list_most_used_medium):
+            print("# ", end = " ")
+            print(fixed_length(str(element[0]), 40), end = " # ")
+            print(fixed_length(str(element[1]), 8), end = " # ")
+            print() 
+        print("#" * 56)
+
+    else:
+        for i in range (1, 6):
+            element = lt.getElement(ordered_list_most_used_medium, i)
+            print("# ", end = " ")
+            print(fixed_length(str(element[0]), 40), end = " # ")
+            print(fixed_length(str(element[1]), 8), end = " # ")
+            print() 
+        print("#" * 56)
+
+    print("\nComo se puede apreciar, su técnica más usada es '" + str(most_used_medium)+ "'.")
+
+    
+    # Tabla obras con técnica most_used_medium.
+    print('Una muestra de algunas obras creadas usando dicha técnica se dispone a continuación:\n')
+    print("#" * 131)
+    print("# ", end = " ")
+    print(fixed_length('TÍTULO', 51), end = " # ")
+    print(fixed_length('FECHA', 5), end = " # ")
+    print(fixed_length('MEDIO', 30), end = " # ")
+    print(fixed_length('DIMENSIONES', 31), end = " # ")
+    print()
+    print("#" * 131)
+    
+    if (lt.size(list_most_used_medium)) < 6:
+        for element in lt.iterator(list_most_used_medium):
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 51), end = " # ")
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Medium'], 30), end = " # ")
+            print(fixed_length(element['Dimensions'], 31), end = " # ")
+            print()
+        print("#" * 131)
+
+    else:
+        new_list = lt.newList('SINGLE_LINKED')
+        size_lt_med = lt.size(list_most_used_medium)
+        lt.addLast(new_list, lt.getElement(list_most_used_medium, 1))
+        lt.addLast(new_list, lt.getElement(list_most_used_medium, 2))
+        lt.addLast(new_list, lt.getElement(list_most_used_medium, 3))
+        lt.addLast(new_list, lt.getElement(list_most_used_medium, size_lt_med -2))
+        lt.addLast(new_list, lt.getElement(list_most_used_medium, size_lt_med -1))
+        lt.addLast(new_list, lt.getElement(list_most_used_medium, size_lt_med))
+
+        for element in lt.iterator(new_list):
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 51), end = " # ")
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Medium'], 30), end = " # ")
+            print(fixed_length(element['Dimensions'], 31), end = " # ")
+            print()
+        print("#" * 131)
+
+    print()
 
 
 
@@ -69,6 +165,12 @@ def print_menu () -> None:
 #####-----#####-----#####-----#####-----#####-----#####   ######---######---######   #####-----#####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####-----#####   FUNCIONES CARGA DE DATOS   #####-----#####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####-----#####   ######---######---######   #####-----#####-----#####-----#####-----#####-----#####
+
+"""
+    Se definen las funciones que permitirán inicializar el catálogo del museo y cargar
+    los elementos de la base de datos.
+
+"""
 
 # Función que inicializa el catálogo del museo.
 def init_catalog () -> dict:
@@ -105,6 +207,25 @@ def load_data (catalog: dict) -> None:
 
 
 
+#####-----#####-----#####-----#####-----#####-----#####   ######---######---######   #####-----#####-----#####-----#####-----#####-----#####
+#####-----#####-----#####-----#####-----#####-----#####   FUNCIONES CARGA DE DATOS   #####-----#####-----#####-----#####-----#####-----#####
+#####-----#####-----#####-----#####-----#####-----#####   ######---######---######   #####-----#####-----#####-----#####-----#####-----#####
+
+"""
+    A continuación se definen funciones que serán de utilidad en general.
+
+"""
+
+# Función que permite acortar texto.
+def fixed_length (text:str, lenght: int) -> str:
+    if len(text) > lenght:
+        text = text[:lenght -3] + '...'
+    elif len(text) < lenght:
+        text = (text + " " * lenght)[:lenght]
+    return(text)
+
+
+
 #####-----#####-----#####-----#####-----#####-----#####   ###---##---###   #####-----#####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####-----#####   MENÚ PRINCIPAL   #####-----#####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####-----#####   ###---##---###   #####-----#####-----#####-----#####-----#####-----#####
@@ -130,7 +251,7 @@ while True:
     print_menu()
 
     # Preguntar al usuario la acción que desea realizar.
-    inputs = input('Por favor, seleccione una opción para continuar:\n  -> ')
+    inputs = input('\nPor favor, seleccione una opción para continuar:\n  -> ')
 
     # Si el usuario ingresó una opción válida.
     try:
@@ -159,58 +280,113 @@ while True:
 
             # Imprimir mensaje de éxito.
             print("\n<> Información cargada con éxito. <>")
-            print("Tiempo de demora:", elapsed_time_mseg, "milisegundos.")
+            print("Tiempo de ejecución:", elapsed_time_mseg, "milisegundos.")
 
 
 
-        # Si escoge la opción 2.
-        elif int(inputs[0]) == 2:
-            pass
+        # Si escoge la opción 4.
+        elif int(inputs[0]) == 4:
+            
+            # Limpiar la consola.
+            os.system('cls')
+
+            # Imprimir mensaje de carga.
+            print("""\n======================= Inputs Req. 3 =======================\n""")
+                
+            # Preguntar al usuario por la nacionalidad.
+            inputs = input('Por favor, escriba el nombre del artista:\n  -> ')
+
+            # Determinar si el artista con nombre inputs se encuentra en este.
+            is_in_catalog = mp.get(catalog['DisplayName'], inputs)
 
 
-
-        # Si escoge la opción 7.
-        elif int(inputs[0]) == 7:
+            # Si se encuentra.
+            if (is_in_catalog):
 
                 # Imprimir mensaje de carga.
-                print("""\n======================= OPCIÓN 7 =======================\n""")
-                
-                # Preguntar al usuario por la nacionalidad.
-                inputs = input('Por favor, escriba la nacionalidad:\n  -> ')
+                print("""\n====================== Outputs Req. 3 =======================\n""")
 
-                # Crear variable que guarda el map 'Nationality'.
-                map_Nation = catalog['Nationality']
+                # Iniciar el tiempo.
+                start_time = time.process_time()
 
-                # Crear variable que determina si la nacionalidad está o no en el map 'Nationality'.
-                exists = mp.contains(map_Nation, inputs)
+                # Guardar respuesta del requerimiento 3.
+                resp_req_3 = controller.req_3(catalog, inputs)
+
+                # Parar el tiempo.
+                stop_time = time.process_time()
+
+                # Calcular tiempo de ejecución en milisegundos e imprimirlo.
+                elapsed_time_mseg = (stop_time - start_time)*1000
+                print("Tiempo de ejecución del requerimiento:", elapsed_time_mseg, "milisegundos.\n")
+
+                # Imprimir respuesta.
+                print_req_3(inputs, resp_req_3)
+
+                sys.exit(0)
+
+            
+            # De lo contrario.
+            else:
+
+                # Limpiar la consola.
+                os.system('cls')
+
+                # Imprimir mensaje de error.
+                print("""\n======================= ERROR =======================\n""")
+                print("El/la artista de nombre '" + inputs + "' no se encuentra en el catálogo. Intente de nuevo.\n")
+                sys.exit(0)
 
 
-                # Si la nacionalidad existe.
-                if (exists):
 
-                    # Guardar lista de obras que tienen esa nacionalidad.
-                    artists_list = mp.get(map_Nation, inputs)['value']
+        # Si escoge la opción 8.
+        elif int(inputs[0]) == 8:
 
-                    # Determinar número total de obras de la nacionalidad.
-                    num_artists = lt.size(artists_list)
+            # Imprimir mensaje de carga.
+            print("""\n======================= OPCIÓN 7 =======================\n""")
+            
+            # Preguntar al usuario por la nacionalidad.
+            inputs = input('Por favor, escriba la nacionalidad:\n  -> ')
 
-                    # Imprimir respuesta.
-                    print("\n<> Respuesta <>")
-                    print("El número total de obras cuyo/s autor/es tiene/n nacionalidad", "'" + str(inputs) + "'", "es:", str(num_artists) + ".")
+            # Crear variable que guarda el map 'Nationality'.
+            map_Nation = catalog['Nationality']
+
+            # Crear variable que determina si la nacionalidad está o no en el map 'Nationality'.
+            exists = mp.contains(map_Nation, inputs)
 
 
-                # Si se ingresa un valor erróneo.
-                else:
-                    print("""\n======================= ERROR =======================\n""")
-                    print("Debe ingresar una nacionalidad válida.\n\n")
-                    sys.exit(0)
+            # Si la nacionalidad existe.
+            if (exists):
 
+                # Guardar lista de obras que tienen esa nacionalidad.
+                artists_list = mp.get(map_Nation, inputs)['value']
+
+                # Determinar número total de obras de la nacionalidad.
+                num_artists = lt.size(artists_list)
+
+                # Imprimir respuesta.
+                print("\n<> Respuesta <>")
+                print("El número total de obras cuyo/s autor/es tiene/n nacionalidad", "'" + str(inputs) + "'", "es:", str(num_artists) + ".")
+
+
+            # Si se ingresa un valor erróneo.
+            else:
+
+                # Limpiar la consola.
+                os.system('cls')
+
+                # Imprimir mensaje de error.
+                print("""\n======================= ERROR =======================\n""")
+                print("Debe ingresar una nacionalidad válida.\n")
+                sys.exit(0)
+
+            sys.exit(0)
 
 
 
 
         # Si escoge la opción 0.
         elif int(inputs[0]) == 0:
+            print()
             sys.exit(0)
 
 

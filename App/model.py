@@ -69,7 +69,8 @@ def new_catalog () -> dict:
                'Medium': None,
                'Nationality': None,
                'ConstituentID': None,
-               'DateAcquired': None}
+               'DateAcquired': None,
+               'DisplayName': None}
     
 
 
@@ -131,6 +132,13 @@ def new_catalog () -> dict:
     # información relevante de las obras cuya fecha de adquisición es equivalente a la llave.
     # El tamaño del mapa se asignó como el siguiente primo a 146100 porque esa es la cantidad de obras en el catálogo.
     catalog["DateAcquired"] = mp.newMap(probehashtable.nextPrime(146100), maptype='CHAINING', loadfactor=4.0)
+
+
+    # Map cuyas llaves son nombres de artistas del catálogo (DisplayName) y cuyos valores son maps. En estos últimos,
+    # las llaves son las técnicas que usó el artista para crear sus obras (Medium) y los valores son listas enlazadas
+    # cuyos elementos son dichas obras.
+    # El tamaño del mapa se asignó como el siguiente primo a 15.224 porque hay 15.224 artistas en el catálogo.
+    catalog["DisplayName"] = mp.newMap(probehashtable.nextPrime(15224), maptype='CHAINING', loadfactor=4.0)
 
 
 
@@ -401,6 +409,95 @@ def add_DateAcquired (catalog: dict, param_Date: str, artwork: dict) -> None:
 
 
 
+# Función que agrega una pareja llave-valor al map "DisplayName".
+def add_DisplayName (catalog: dict, param_DisNam: str) -> None:
+    """
+        Esta función permite agregar una pareja llave-valor al map "DisplayName" del catálogo.
+        
+        La llave deberá ser un DisplayName, es decir, una cadena de caracteres.
+        El valor será un map que contendrá parejas Medium-lista_obras.
+
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_DisNam (str): llave referente a un ConstituentID.
+
+        No tiene retorno.
+
+    """
+
+    # Crear variable que guarda el mapa "DisplayName" del catálogo.
+    map_DisplayName = catalog["DisplayName"]
+
+    # Crear variable que guardará el mapa que contendrá parejas Medium-lista_obras del autor
+    # con nombre param_DisNam.
+    new_Medium_map = mp.newMap(maptype = 'PROBING')
+
+    # Añadir la pareja DisplayName-Medium_map al mapa 'DisplayName'.
+    mp.put(map_DisplayName, param_DisNam, new_Medium_map)
+
+
+
+# Función que agrega una pareja llave-valor a los mapas Medium-artwork_list, los cuales son los
+# valores del mapa 'DisplayName' del catálogo.
+def add_pair_Medium_artworkList (Medium_map: dict, param_Medium: str, artwork: dict) -> None:
+    """
+        Esta función permite agregar una pareja llave-valor al map "Medium_map".
+        Cada "Medium_map" es un valor del map 'DisplayName' del catálogo. Estos almacenan
+        parejas Medium-lista_obras; las llaves son todas las técnicas que ha usado un artista
+        para la creación de sus obras, y los valores son listas cuyos elementos son las obras
+        que fueron creadas usando dicha técnica.
+        
+        La llave de "Medium_map" deberá ser una técnica/medio, es decir, una cadena de caracteres.
+        El valor será una lista enlazada, cuyos elementos son diccionarios que
+        representan a cada obra creada con dicha técnica (para más detalle de la información contienen estos
+        diccionarios, revisar la documentación de la función new_artwork()).
+
+        En caso de que la pareja Medium-lista_obras ya exista, se añadirá la obra a lista_obras.
+        En caso de que la pareja Medium-lista_obras no exitsa, se creará la lista que contiene a las
+        obras que fueron creadas con esa técnica, se añadirá la información de la obra a dicha lista
+        y se añadirá la nueva pareja Medium-lista_obras al map "Medium_map".
+
+
+        Parámetros:
+            -> Medium_map (dict): mapa que tiene parejas Medium-lista_obras.
+            -> param_Medium (str): llave referente a una técnica.
+            -> artwork (dict): diccionario que representa a la obra que se quiere añadir.
+
+        No tiene retorno.
+
+    """
+
+    # Determinar si la pareja llave-valor ya existe.
+    exists = mp.contains(Medium_map, param_Medium)
+
+
+    # Si ya existe la pareja llave-valor en Medium_map.
+    if (exists):
+
+        # Crear variable que guarda la lista de las obras que fueron creadas con param_Medium.
+        list_Medium_artworks = mp.get(Medium_map, param_Medium)["value"]
+
+        # Añade la obra a list_DateAcquired_artworks.
+        lt.addLast(list_Medium_artworks, artwork)
+
+
+    # Si no existe la pareja llave-valor.
+    else:
+
+        # Crear una nueva lista de las obras que fueron creadas con param_Medium.
+        new_list_Medium_artists = lt.newList('SINGLE_LINKED')
+        
+        # Añade la obra a new_list_Medium_artists.
+        lt.addLast(new_list_Medium_artists, artwork)
+
+        # Añade la pareja DateAcquired-lista_obras al map.
+        mp.put(Medium_map, param_Medium, new_list_Medium_artists)
+
+
+
+
+
 
 #####-----#####-----#####-----#####-----#####   ###---####----###   #####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####   CREACIÓN DE DATOS   #####-----#####-----#####-----#####-----#####
@@ -593,6 +690,53 @@ def cmp_by_DateAcquired (artwork_1: dict, artwork_2: dict) -> bool:
 
 
 
+# Función que compara dos técnicas según la cantidad de veces que se usaron.
+def cmp_Mediums (medium_1: tuple, medium_2: tuple) -> bool:
+    """
+        Esta función permite determinar si la cantidad de veces que se usó medium_1 es mayor que
+        la cantidad de veces que se usó medium_2.
+
+        Los parámetros son tuplas cuyo primer elemento es la cadena referente a la técnica y cuyo
+        segundo elemento es la cantidad de veces que esta se usó.
+
+        Parámetros:
+            -> medium_1 (tuple): tupla de la primera técnica.
+            -> medium_2 (tuple): tupla de la segunda técnica.
+
+        Retorno:
+            -> (bool): True en caso de que la cantidad de veces que se usó medium_1 es 
+                       mayor que la cantidad de veces que se usó medium_2.
+                       False de lo contrario. 
+
+    """
+
+    # Determinar si es mayor o no y retornar respuesta.
+    answer = (medium_1[1] > medium_2[1])
+    return answer
+
+
+
+# Función que compara dos obras según sus fechas.
+def cmp_artworks_by_Date (artwork_1: dict, artwork_2: dict) -> bool:
+    """
+        Esta función permite determinar si la fecha de artwork_1 es menor que la fecha de artwork_2.
+
+        Parámetros:
+            -> artwork_1: información de la primera obra.
+            -> artwork_2: información de la segunda obra.
+
+        Retorno:
+            -> (bool): True en caso de que la fecha de artwork_1 sea menor que la fecha de artwork_2.
+                       False de lo contrario. 
+
+    """
+
+    # Determinar si es menor o no y retornar respuesta.
+    answer = (artwork_1['Date'] < artwork_2['Date'])
+    return answer
+
+
+
 
 #####-----#####-----#####-----#####-----#####   #####---#######----#####   #####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####   FUNCIONES REQUERIMIENTOS   #####-----#####-----#####-----#####-----#####
@@ -712,8 +856,8 @@ def req_2 (catalog: dict, first_date: str, last_date: str) -> tuple:
 
                 # Guardar línea de crédito de la obra, determinar si es igual a 'Purchase' y, si lo es,
                 # aumentar num_purch en 1.
-                artwork_CreditLine = artwork['CreditLine']
-                is_purchase = (artwork_CreditLine == 'Purchase')
+                artwork_CreditLine = artwork['CreditLine'].lower()
+                is_purchase = (artwork_CreditLine == 'purchase' or artwork_CreditLine == 'purchased')
                 if (is_purchase):
                     num_purch += 1
 
@@ -723,8 +867,63 @@ def req_2 (catalog: dict, first_date: str, last_date: str) -> tuple:
     # Retornar tupla.
     return (ordered_ordered_list, num_purch)
 
+
+
+# Función del requerimiento 3.
+def req_3 (catalog: dict, param_DisplayName: str) -> tuple:
+    """
+        Dado el nombre de un/una artista, esta función retorna 
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_DisplayName (str): nombre del artista.
+
+        Retorno:
+            -> (tuple): tupla cuyo primer elemento es la lista que contiene la respuesta
+                        y cuyo segundo elemento representa la cantidad de obras que fueron
+                        adquiridas por compra.
+
+    """
+
+    # Guardar el mapa de las técnicas del artista con nombre param_DisplayName.
+    Mediums_map = mp.get(catalog['DisplayName'], param_DisplayName)['value']
+
+    # Crear variables de retorno.
+    total_artworks = 0
+    total_mediums = mp.size(Mediums_map)
+    most_used_medium = ''
+    list_most_used_medium = None
+    list_medium_sizes = lt.newList('SINGLE_LINKED')
+
+
+    # Recorrer todas las técnicas de Mediums_map.
+    for medium in lt.iterator(mp.keySet(Mediums_map)):
         
+        # Guardar tamaño de lista que contiene las obras que fueron creadas usando la técnica medium.
+        # y aumentar valor total_artworks.
+        size_artwork_list = lt.size(mp.get(Mediums_map, medium)['value'])
+        total_artworks += size_artwork_list
+
+        # Añadir tupla (medium, size_artwork_list) a list_medium_sizes.
+        lt.addLast(list_medium_sizes, (medium, size_artwork_list))
+
+    # Organizar list_medium_sizes.
+    ordered_list_medium_sizes = qui.sort(list_medium_sizes, cmp_Mediums)
+
+    # Guardar técnica más usada.
+    most_used_medium = lt.getElement(ordered_list_medium_sizes, 1)[0]
+        
+    # Guardar en list_most_used_medium la lista de las obras que fueron creadas con most_used_medium.
+    # Crear varable que guarda dicha lista ordenada.
+    list_most_used_medium = mp.get(Mediums_map, most_used_medium)['value']
+    ordered_list_most_used_medium = qui.sort(list_most_used_medium, cmp_artworks_by_Date)
     
+    
+
+    # Armar tupla de retorno y retornarla.
+    answer = (total_artworks, total_mediums, most_used_medium, ordered_list_most_used_medium, ordered_list_medium_sizes)
+    return answer        
+
 
 
 

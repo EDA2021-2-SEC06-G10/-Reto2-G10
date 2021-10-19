@@ -16,30 +16,38 @@ Integrantes:
 
 ##--##--##  Model  ##--##--##
 
- 1- Se modificó la función new_artwork() de tal forma que fuese posible saber el CreditLine y las Dimensions de cada obra.
-
- 2- Se modificó la función new_catalog() para añadir al catálogo el map 'DateAcquired'. Además, se borraron de esta las listas 'artists' y 'artworks', ya que estas no servían propósito alguno.
-
- 3- Teniendo en cuenta esto último, se eliminaros las funciones add_artist() y add_artwork(), ya que tampoco servían para nada.
-
- 4- Se definieron las siguientes funciones:
-    -> add_DateAcquired().
-    -> cmp_by_DateAcquired().
-
-5- Se importó la librería datetime.
+ 1- Se modificó la función new_catalog() para añadir el map 'DisplayName'.
+ 
+ 2- Se definieron las siguientes funciones:
+    -> add_DisplayName().
+    -> add_pair_Medium_artworkList().
+    -> cmp_Mediums().
+    -> req_3().
+    -> cmp_artworks_by_Date().
 
 
 
 ##--##--##  Controller  ##--##--##
 
- 1- Se modificó la función load_artworks() de tal forma que siempre que se añada información de una obra se haga referencia al mismo diccionario que representa dicha usando la función model.new_artwork(). 
+ 1- En la función load_artworks(), se realizaron las siguientes modificaciones:
+    -> Se ordenó el cuerpo de la función de tal forma que primero se guarden las variables de los valores de interés de la obra y los maps de interés del catálogo.
+    -> Se añadió el bloque de código que permitirá añadir parejas llave valor al map 'DisplayName' del catálogo.
 
- 2- Se modificó la función load_artworks() para que se pudiesen añadir parejas llave-valor al map 'DateAcquired'.
+ 2- Se definieron las siguientes funciones:
+    -> req_1().
+    -> req_2().
+    -> req_3().   
 
 
 ##--##--##  View  ##--##--##
  
- 1- 
+ 1- Se definieron las siguientes funciones:
+    -> print_req_3().
+    -> fixed_length().
+
+ 2- Se importó la librería os.
+
+ 3- Se modificó el menú principal para que fuese posible implementar el requerimiento 3.
 
 
 #####-----#####-----#####-----#####   #---#---#   #####-----#####-----#####-----#####

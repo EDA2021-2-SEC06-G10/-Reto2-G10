@@ -157,29 +157,37 @@ def load_artworks (catalog: dict) -> None:
     # Crear variable que guarda todas las obras.
     input_file = csv.DictReader(open(artworks_file, encoding='utf-8'))
 
+
     # Añadir cada obra al catálogo.
     for artwork in input_file:
 
         # Crear una obra con la información de la iteración actual.
         artwork_info = model.new_artwork(artwork)
 
-
-        # Crear variable que guarda su técnica.
+        # Crear variables que guardan el Medium, los ConstituentID y el DateAcquired de artwork.
         artwork_Medium = artwork_info["Medium"]
+        ConstituentID_list = artwork_info["ConstituentID"]
+        artwork_DateAcquired = artwork_info["DateAcquired"]
+
+        # Crear variabes que guardan los maps ConstituentID y DisplayName del catálogo.
+        map_ConstituentID = catalog["ConstituentID"]
+        map_DisplayName = catalog['DisplayName']
+
+
+
+        #####-----#####-----#####-----#####   Bloque Map 'Medium'   #####-----#####-----#####-----#####
 
         # Añadir la pareja llave-valor al map 'Medium' si su técnica está registrada.
         if not (artwork_Medium == ""):
             model.add_Medium(catalog, artwork_Medium, artwork_info)
+        
+        
 
-        
-        # Crear variable que guarda la lista de los ConstituentID de los autores de la obra.
-        ConstituentID_list = artwork_info["ConstituentID"]
-        
+        #####-----#####-----#####-----#####   Bloque Maps 'Nationality' y 'DisplayName'   #####-----#####-----#####-----#####
+
         # Crear variable que guardará la llave referente a la nacionalidad de la obra.
         new_Nacion_key = ""
 
-        # Crear variable que guarda el mapa 'ConstituentID'.
-        map_ConstituentID = catalog["ConstituentID"]
 
         # Recorrer la lista que contiene los ConstituentID de la obra.
         for ConstituentID in ConstituentID_list:
@@ -189,7 +197,7 @@ def load_artworks (catalog: dict) -> None:
 
                 # Convertir el ConstituentID a un entero.
                 ConstituentID_key = int(float(ConstituentID))
-
+                
                 # Determinar si la llave ConstituentID_key está en el mapa 'ConstituentID_key'.
                 exists = mp.contains(map_ConstituentID, ConstituentID_key)
 
@@ -197,25 +205,127 @@ def load_artworks (catalog: dict) -> None:
                 # Si la llave existe.
                 if (exists):
                     
-                    # Crear variable que guarda la información del artista identificado con ConstituentID_key
-                    # y guardar su nacionalidad.
-                    info_artist = mp.get(map_ConstituentID, ConstituentID_key)["value"]
-                    artists_nacion = info_artist["Nationality"]
+                    #####-----#####-----#####-----#####   Bloque Map 'Nationality'   #####-----#####-----#####-----#####
+
+                    # Crear variable que guarda la nacionalidad del artista identificado con ConstituentID_key.
+                    artists_nacion = mp.get(map_ConstituentID, ConstituentID_key)["value"]["Nationality"]
 
                     # Concatenar la nacionalidad del artista actual con las demás nacionalidades.
                     new_Nacion_key += artists_nacion
+
+
+
+                    #####-----#####-----#####-----#####   Bloque Map 'DisplayName'   #####-----#####-----#####-----#####
+                    
+                    # Crear variable que guarda el nombre del artista identificado con ConstituentID_key.
+                    artist_DisplayName = mp.get(map_ConstituentID, ConstituentID_key)['value']['DisplayName']
+
+                    # Determinar si el artista se encuentra en el map 'DisplayName'.
+                    exists_DisplayName = mp.contains(map_DisplayName, artist_DisplayName)
+
+
+                    # Si se encuentra.
+                    if (exists_DisplayName):
+
+                        # Guardar el Medium_map del artista y añadir la obra actual al mapa 'Medium' del artista.
+                        artists_Medium_map = mp.get(map_DisplayName, artist_DisplayName)['value'] 
+                        model.add_pair_Medium_artworkList(artists_Medium_map, artwork_Medium, artwork_info)
+                    
+                    # Si no se encuentra.
+                    else:
+
+                        # Crear una pareja DisplayName-Medium_map.
+                        model.add_DisplayName(catalog, artist_DisplayName)
+
+                        # Guardar el Medium_map del artista y añadir la obra actual al mapa 'Medium' del artista.
+                        artists_Medium_map = mp.get(map_DisplayName, artist_DisplayName)['value'] 
+                        model.add_pair_Medium_artworkList(artists_Medium_map, artwork_Medium, artwork_info)
 
 
         # Añadir la pareja llave-valor al map 'Nationality'.
         model.add_Nationality(catalog, new_Nacion_key, artwork_info)
 
 
-        # Crear variable que guarda la fecha de adquicisión de la obra.
-        artwork_DateAcquired = artwork_info["DateAcquired"]
+
+        #####-----#####-----#####-----#####   Bloque Map 'DateAcquired'   #####-----#####-----#####-----#####
 
         # Añadir la pareja llave-valor al map 'DateAcquired' si su fecha de adquicisión está registrada.
         if not (artwork_DateAcquired == ""):
             model.add_DateAcquired(catalog, artwork_DateAcquired, artwork_info)
+        
+
+
+        
+#####-----#####-----#####-----#####-----#####   ########-----#####-----########   #####-----#####-----#####-----#####-----#####
+#####-----#####-----#####-----#####-----#####   FUNCIONES CONEXIÓN MODEL Y VIEW   #####-----#####-----#####-----#####-----#####
+#####-----#####-----#####-----#####-----#####   ########-----#####-----########   #####-----#####-----#####-----#####-----#####
+
+# Función del requerimiento 1.
+def req_1 (catalog: dict, first_year: int, last_year: int) -> dict:
+    """
+        Esta función retorna una listas cronológicamente ordenada que contiene auqellos artistas
+        que nacieron dentro de un rango de años indicado por el usuario.
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> first_year (int): año inicial.
+            -> last_year (int): año final.
+
+        Retorno:
+            -> (dict): diccionario que representa la lista que contiene la respuesta.
+
+    """
+
+    # Crear variable que guarda la respuesta del requerimiento 1 y retornarla.
+    resp_req_1 = model.req_1(catalog, first_year, last_year)
+    return resp_req_1
+
+
+
+# Función del requerimiento 2.
+def req_2 (catalog: dict, first_date: str, last_date: str) -> tuple:
+    """
+        Dado un rango de fechas, esta función retorna una tupla que contiene lista cronológicamente ordenada 
+        que almacena las obras que fueron compradas por el museo durante dicho rango de tiempo y la cantidad 
+        de obras que fueron adquiridas por compra.
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> first_date (str): fecha inicial.
+            -> last_date (str): fecha final.
+
+        Retorno:
+            -> (tuple): tupla cuyo primer elemento es la lista que contiene la respuesta
+                        y cuyo segundo elemento representa la cantidad de obras que fueron
+                        adquiridas por compra.
+
+    """
+
+    # Crear variable que guarda la respuesta del requerimiento 2 y retornarla.
+    resp_req_2 = model.req_2(catalog, first_date, last_date)
+    return resp_req_2
+
+
+
+# Función del requerimiento 3.
+def req_3 (catalog: dict, param_DisplayName: str) -> tuple:
+    """
+        Dado el nombre de un/una artista, esta función retorna 
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_DisplayName (str): nombre del artista.
+
+        Retorno:
+            -> (tuple): tupla cuyo primer elemento es la lista que contiene la respuesta
+                        y cuyo segundo elemento representa la cantidad de obras que fueron
+                        adquiridas por compra.
+
+    """
+
+    # Crear variable que guarda la respuesta del requerimiento 3 y retornarla.
+    resp_req_3 = model.req_3(catalog, param_DisplayName)
+    return resp_req_3
 
 
 
@@ -223,43 +333,10 @@ def load_artworks (catalog: dict) -> None:
 
 
 
-# Inicialización del Catálogo de libros
-
-# Funciones para la carga de datos
-
-# Funciones de ordenamiento
-
-# Funciones de consulta sobre el catálogo
 
 
 
-# Pruebas lab. 6.
 
-'''
-catalog = init_catalog()
-load_data(catalog)
-
-cosa_que_necesito = catalog['Nationality']
-lista = lt.iterator(mp.keySet(cosa_que_necesito))
-
-for nacion in lista:
-    print(nacion)
-'''
-
-'''
-# Crear variable de retorno.
-less_than = False
-
-# Crear variables con las fechas de adquisición modificadas.
-mod_DateAcquired_1 = date.datetime.strptime('2021-10-10', '%Y-%m-%d')
-mod_DateAcquired_2 = date.datetime.strptime('1991-10-10', '%Y-%m-%d')
-
-# Determinar si es menor.
-if mod_DateAcquired_1 > mod_DateAcquired_2:
-    less_than = True
-
-print(less_than)
-'''
 
 
 '''
@@ -290,7 +367,7 @@ for elemento in iterador_elem_lista:
     print(elemento)
 """
 
-#'''
+'''
 # Pruebas req 2.
 catalog = init_catalog()
 load_data(catalog)
@@ -305,4 +382,19 @@ print(lt.getElement(lista,3)['Title'])
 print(lt.getElement(lista, lt.size(lista) - 2)['Title'])
 print(lt.getElement(lista, lt.size(lista) - 1)['Title'])
 print(lt.getElement(lista, lt.size(lista))['Title'])
-#'''
+'''
+
+'''
+map_prueba = mp.newMap()
+
+for i in range(6):
+    nuevo_mapa = mp.newMap()
+    mp.put(map_prueba, "mapa_" + str(i), nuevo_mapa)
+
+mapa_del_mapa = mp.get(map_prueba, "mapa_1")['value']
+for j in range(4):
+    mp.put(mapa_del_mapa, "medio_" + str(j), j)
+
+for medio in lt.iterator(mp.keySet(mapa_del_mapa)):
+    print(medio)
+'''
