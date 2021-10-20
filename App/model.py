@@ -788,23 +788,25 @@ def cmp_artworks_by_Date (artwork_1: dict, artwork_2: dict) -> bool:
 
 
 
-# Función que compara dos obras según sus fechas.
+# Función que compara dos obras según sus precios de transporte.
 def cmp_artworks_by_Price (artwork_1: dict, artwork_2: dict) -> bool:
     """
-        Esta función permite determinar si la fecha de artwork_1 es menor que la fecha de artwork_2.
+        Esta función permite determinar si el precio de transporte de artwork_1 es mayor que el 
+        el precio de transporte de artwork_2.
 
         Parámetros:
             -> artwork_1: información de la primera obra.
             -> artwork_2: información de la segunda obra.
 
         Retorno:
-            -> (bool): True en caso de que la fecha de artwork_1 sea menor que la fecha de artwork_2.
+            -> (bool): True en caso de que el precio de transporte de artwork_1 sea mayor que 
+                       el de artwork_2.
                        False de lo contrario. 
 
     """
 
-    # Determinar si es menor o no y retornar respuesta.
-    answer = (artwork_1['Price (USD)'] < artwork_2['Price (USD)'])
+    # Determinar si es mayor o no y retornar respuesta.
+    answer = (artwork_1['Price (USD)'] > artwork_2['Price (USD)'])
     return answer
 
 
@@ -998,59 +1000,59 @@ def req_3 (catalog: dict, param_DisplayName: str) -> tuple:
 # Función del requerimiento 5.
 def req_5 (catalog: dict, param_Dep: str) -> tuple:
     """
-        Dado el nombre de un/una artista, esta función retorna 
+        Dado el nombre de un departamento del museo, esta función retorna un tupla que contiene los siguientes elementos:
+            1- Precio en USD en el que se debería incurrir si se desea transportar todas las obras de
+               dicho dpto.
+            2- Peso estimado de todas las obras.
+            3- Lista ordenada de las obras del dpto. según su fecha.
+            4- Lista ordenada de las obras del dpto. según su precio de transporte.
 
         Parámetros:
             -> catalog (dict): catálogo.
-            -> param_DisplayName (str): nombre del artista.
+            -> param_Dep (str): cadena referente a un dpto. del museo.
 
         Retorno:
-            -> (tuple): tupla cuyo primer elemento es la lista que contiene la respuesta
-                        y cuyo segundo elemento representa la cantidad de obras que fueron
-                        adquiridas por compra.
+            -> (tuple): tupla con los elementos descritos anteriormente.
 
     """
 
-    # Guardar mapa 'Department'.
-    map_Dep = catalog['Department']
+    map_Dep = catalog['Department']                     # Mapa 'Department' del catálogo.
+    artwork_list = mp.get(map_Dep, param_Dep)['value']  # Lista que contiene las obras pertenecientes al dpto.
+    total_price = 0.0                                   # Variable precio total.
+    total_weight = 0.0                                  # Variable peso total.
 
-    # Guardar lista obras.
-    artwork_list = mp.get(map_Dep, param_Dep)['value']
+    # Crear lista que contiene las obras que pertenecen al dpto. y que tiene una fecha registrada.
+    lt_artworks_dep_date = lt.newList()
 
-    # Crear variable precio total.
-    total_price = 0.0
-    total_weight = 0.0
-
-    new_art_lt = lt.newList()
 
     # Recorrer artwork_list.
     for artwork in lt.iterator(artwork_list):
 
-        # Calcular precio.
+        # Calcular precio de la obra y sumarlo al total.
         price = calc_price(artwork)
         total_price += price
-
-        # Peso.
+        
+        # Calcular peso de la obra y sumarlo al total.
         weight = artwork['Weight (kg)']
         total_weight += weight
 
-        # Añadir a new_art_lt si tiene fecha.
+        # Añadir obra a lt_artworks_dep_date si tiene fecha registrada.
         if (artwork['Date'] != ''):
-            lt.addLast(new_art_lt,artwork)
-
-        # Añadir a new_art_lt si tiene peso.
-        if (artwork['Date'] != ''):
-            lt.addLast(new_art_lt,artwork)
-
-    
+            lt.addLast(lt_artworks_dep_date,artwork)
 
 
+    # Variable que guarda la lista que contiene las obras del dpto..
+    # Dicha está ordenada según las fechas de cada obra.
+    lt_ord_art_date = qui.sort(lt_artworks_dep_date, cmp_artworks_by_Date)
 
-    order_artw_lt = qui.sort(new_art_lt, cmp_artworks_by_Date)
+    # Variable que guarda la lista que contiene las obras del dpto..
+    # Dicha está ordenada según los precios de transporte de cada obra.
+    lt_ord_art_price = qui.sort(artwork_list, cmp_artworks_by_Price) 
 
-    order_artwork_list_price = qui.sort(artwork_list, cmp_artworks_by_Price) 
+    # Empaquetar variables y retornarlas.
+    return_tuple = (round(total_price, 3), round(total_weight, 3), lt_ord_art_date, lt_ord_art_price)
+    return return_tuple
 
-    return(total_price, total_weight, order_artw_lt, order_artwork_list_price)
 
 
 
@@ -1091,8 +1093,8 @@ def turn_into_list (list_in_str: str) -> list:
 def calc_price (artwork: dict) -> float:
     """
         Dada la información de una obra, esta función permite calcular su precio de transporte
-        asociado. Además, permite añadir a dicha un atributo nuevo llamado trans_price, el cual
-        debe ser de tipo float.
+        asociado. Además, permite añadir a dicha un atributo nuevo llamado 'Price (USD)', el cual
+        es de tipo float.
 
         Parámetros:
             -> artwork (dict): diccionario que contiene la información de la obra.
@@ -1115,34 +1117,34 @@ def calc_price (artwork: dict) -> float:
     lenght = artwork['Length (cm)']
     weight = artwork['Weight (kg)']
     width = artwork['Width (cm)']
-    
 
     # Variable que cuenta la cantidad de dimensiones que tiene la obra diferentes al diámetro.
     num_dim = 0
 
 
-    # Condicionales para modificar dimensiones.
-
+    #####-----#####-----#####-----#####   Condicionales de las Dimensiones   #####-----#####-----#####-----#####
+    
+    # Dimensión 'depth'.
     if (depth != ""):
         if (depth != '0'):
             depth = float(depth)
             num_dim += 1
         else:
             depth = 1
-
     else:
         depth = 1
 
+    # Dimensión 'height'.
     if (height != ""):
         if (height != '0'):
             height = float(height)
             num_dim += 1
         else:
             height = 1
-
     else:
         height = 1
 
+    # Dimensión 'lenght'.
     if (lenght != ""):
         if (lenght != '0'):
             lenght = float(lenght)
@@ -1152,6 +1154,7 @@ def calc_price (artwork: dict) -> float:
     else:
         lenght = 1
 
+    # Dimensión 'width'.
     if (width != ""):
         if (width != '0'):
             width = float(width)
@@ -1162,21 +1165,22 @@ def calc_price (artwork: dict) -> float:
         width = 1
 
 
+    #####-----#####-----#####-----#####-----#####   Cálculo Precio Según Casos  #####-----#####-----#####-----#####-----#####
 
-    #####-----#####-----#####   Cálculos   #####-----#####-----#####
-
-    # Caso -1: no tiene dimensiones.
-    if (num_dim == 0 and weight != "" and diam != ""):
-        price = 0.0
+    # Caso -1: la obra no tiene dimensiones.
+    if (num_dim == 0 and (weight != "" or weight != 0) and (diam != "" or diam != 0)):
+        price = 48
+        weight = 0.0            # Actualizar valor peso.
 
     else:
+        
         # Caso 0: la figura tiene peso.
         if (weight != ""):
             price = UNIT_COST * float(weight)
 
         else:
             
-            weight = 0.0        # Atualizar valor peso.
+            weight = 0.0        # Actualizar valor peso.
 
             # Si la figura tiene diámetro.
             if (diam != ""):
@@ -1212,9 +1216,9 @@ def calc_price (artwork: dict) -> float:
                     weight = (depth*height*lenght*width)/100
     
 
-    # Actualizar peso.
+    # Actualizar peso de la obra.
     artwork['Weight (kg)'] = weight
 
-    # Retornar precio.
+    # Actualizar y retornar precio de transporte de la obra.
     artwork['Price (USD)'] = price
     return price

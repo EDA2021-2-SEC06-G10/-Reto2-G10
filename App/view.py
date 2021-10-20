@@ -230,6 +230,204 @@ def print_req_3 (artist_name: str, resp_req_3: tuple) -> None:
 
 
 
+# Función que imprime la respuesta del requerimiento 5.
+def print_req_5 (dep_name: str, resp_req_5: tuple) -> None:
+    """
+        Esta función imprime la respuesta del requerimiento 5 de una manera amigable para el usuario.
+
+        Parámetro:
+            -> dep_name (str): nombre del departamento.
+            -> resp_req_5 (tuple): tupla que contiene las respuestas del requerimiento 5.
+
+        No tiene retorno.
+
+    """
+
+    # Desempaquetar resp_req_5.
+    total_price, total_weight, lt_ord_art_date, lt_ord_art_price = resp_req_5
+
+    # Mapa 'ConstituentID'.
+    map_consid = catalog['ConstituentID']
+
+    # Primera parte.
+    print('Sería necesario transportar', lt.size(lt_ord_art_price) , 'obras del departamento', "'" + dep_name + "'" , 'del museo.')
+    print('Aproximadamente, el costo total de esta operación equivaldría a $USD', str(total_price) + '.')
+    print('En total, habría que transportar', total_weight, 'kg aproximadamente.')
+
+    # Segunda parte.
+    print('\nUna muestra de las obras con los costos de transporte más altos se dispone a continuación:\n')
+    print("#" * 147)
+    print("# ", end = " ")
+    print(fixed_length('TÍTULO', 30), end = " # ")
+    print(fixed_length('ARTISTA(S)', 40), end = " # ")
+    print(fixed_length('CLASIFICACIÓN', 15), end = " # ")
+    print(fixed_length('FECHA', 5), end = " # ")
+    print(fixed_length('DIMENSIONES', 25), end = " # ")
+    print(fixed_length('COSTO (USD)', 12), end = " # ")
+    print()
+    print("#" * 147)
+
+    if (lt.size(lt_ord_art_price)) < 5:
+        for element in lt.iterator(lt_ord_art_price):
+            
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 30), end = " # ")
+
+            if len(element['ConstituentID']) == 1:
+                artists_id = element['ConstituentID'][0]
+                name = mp.get(map_consid, float(int(artists_id)))['value']['DisplayName']
+                print(fixed_length(name, 40), end = " # ")
+            
+            else:
+                str_artists = ''
+                num_artists = len(element['ConstituentID']) - 1
+                counter = 0
+                for artist in element['ConstituentID']:
+                    name = mp.get(map_consid, float(int(artist)))['value']['DisplayName']
+                    if (counter == num_artists):
+                        str_artists += name
+                    else:
+                        str_artists += name + ", "
+                    counter += 1
+                print(fixed_length(str_artists, 40), end = " # ")
+
+            print(fixed_length(element['Classification'], 15), end = " # ")
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Dimensions'], 25), end = " # ")
+            print(fixed_length(str(round(element['Price (USD)'],3)), 12), end = " # ")
+            print()
+        print("#" * 147)
+
+    else:
+
+        new_list = lt.newList('SINGLE_LINKED')
+        lt.addLast(new_list, lt.getElement(lt_ord_art_price, 1))
+        lt.addLast(new_list, lt.getElement(lt_ord_art_price, 2))
+        lt.addLast(new_list, lt.getElement(lt_ord_art_price, 3))
+        lt.addLast(new_list, lt.getElement(lt_ord_art_price, 4))
+        lt.addLast(new_list, lt.getElement(lt_ord_art_price, 5))
+         
+
+        for element in lt.iterator(new_list):
+            
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 30), end = " # ")
+
+            if len(element['ConstituentID']) == 1:
+                artists_id = element['ConstituentID'][0]
+                name = mp.get(map_consid, float(int(artists_id)))['value']['DisplayName']
+                print(fixed_length(name, 40), end = " # ")
+            
+            else:
+                str_artists = ''
+                num_artists = len(element['ConstituentID']) - 1
+                counter = 0
+                for artist in element['ConstituentID']:
+                    name = mp.get(map_consid, float(int(artist)))['value']['DisplayName']
+                    if (counter == num_artists):
+                        str_artists += name
+                    else:
+                        str_artists += name + ", "
+                    counter += 1
+                print(fixed_length(str_artists, 40), end = " # ")
+
+            print(fixed_length(element['Classification'], 15), end = " # ")
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Dimensions'], 25), end = " # ")
+            print(fixed_length(str(round(element['Price (USD)'],3)), 12), end = " # ")
+            print()
+        print("#" * 147)
+
+
+
+    # Tercera parte.
+    print('\nPor otro lado, una muestra de las obras más antiguas que se van a transportar se dispone a continuación:\n')
+    print("#" * 147)
+    print("# ", end = " ")
+    print(fixed_length('TÍTULO', 30), end = " # ")
+    print(fixed_length('ARTISTA(S)', 40), end = " # ")
+    print(fixed_length('CLASIFICACIÓN', 15), end = " # ")
+    print(fixed_length('FECHA', 5), end = " # ")
+    print(fixed_length('DIMENSIONES', 25), end = " # ")
+    print(fixed_length('COSTO (USD)', 12), end = " # ")
+    print()
+    print("#" * 147)
+
+    if (lt.size(lt_ord_art_date)) < 5:
+        for element in lt.iterator(lt_ord_art_date):
+            
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 30), end = " # ")
+
+            if len(element['ConstituentID']) == 1:
+                artists_id = element['ConstituentID'][0]
+                name = mp.get(map_consid, float(int(artists_id)))['value']['DisplayName']
+                print(fixed_length(name, 40), end = " # ")
+            
+            else:
+                str_artists = ''
+                num_artists = len(element['ConstituentID']) - 1
+                counter = 0
+                for artist in element['ConstituentID']:
+                    name = mp.get(map_consid, float(int(artists_id)))['value']['DisplayName']
+                    if (counter == num_artists):
+                        str_artists += name
+                    else:
+                        str_artists += name + ", "
+                    counter += 1
+                print(fixed_length(str_artists, 40), end = " # ")
+
+            print(fixed_length(element['Classification'], 15), end = " # ")
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Dimensions'], 25), end = " # ")
+            print(fixed_length(str(round(element['Price (USD)'],3)), 12), end = " # ")
+            print()
+        print("#" * 147)
+
+    else:
+
+        new_list = lt.newList('SINGLE_LINKED')
+        lt.addLast(new_list, lt.getElement(lt_ord_art_date, 1))
+        lt.addLast(new_list, lt.getElement(lt_ord_art_date, 2))
+        lt.addLast(new_list, lt.getElement(lt_ord_art_date, 3))
+        lt.addLast(new_list, lt.getElement(lt_ord_art_date, 4))
+        lt.addLast(new_list, lt.getElement(lt_ord_art_date, 5))
+         
+
+        for element in lt.iterator(new_list):
+            
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 30), end = " # ")
+
+            if len(element['ConstituentID']) == 1:
+                artists_id = element['ConstituentID'][0]
+                name = mp.get(map_consid, float(int(artists_id)))['value']['DisplayName']
+                print(fixed_length(name, 40), end = " # ")
+            
+            else:
+                str_artists = ''
+                num_artists = len(element['ConstituentID']) - 1
+                counter = 0
+                for artist in element['ConstituentID']:
+                    name = mp.get(map_consid, float(int(artist)))['value']['DisplayName']
+                    if (counter == num_artists):
+                        str_artists += name
+                    else:
+                        str_artists += name + ", "
+                    counter += 1
+                print(fixed_length(str_artists, 40), end = " # ")
+
+            print(fixed_length(element['Classification'], 15), end = " # ")
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Dimensions'], 25), end = " # ")
+            print(fixed_length(str(round(element['Price (USD)'],3)), 12), end = " # ")
+            print()
+        print("#" * 147)
+
+    print()
+
+
+
 
 #####-----#####-----#####-----#####-----#####-----#####   ######---######---######   #####-----#####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####-----#####   FUNCIONES CARGA DE DATOS   #####-----#####-----#####-----#####-----#####-----#####
@@ -328,8 +526,11 @@ while True:
         # Si escoge la opción 1.
         if int(inputs[0]) == 1:
 
+            # Limpiar la consola.
+            os.system('cls')
+            
             # Imprimir mensaje de carga.
-            print("""\n======================= OPCIÓN 1 =======================\n""")
+            print("""\n======================= Carga de Datos =======================\n""")
             print("Cargando información al catálogo ...")
 
             # Inicializar catálogo.
@@ -417,7 +618,7 @@ while True:
             inputs = input('Por favor, escriba el nombre del artista:\n  -> ')
 
             # Determinar si el artista con nombre inputs se encuentra en este.
-            is_in_catalog = mp.get(catalog['DisplayName'], inputs)
+            is_in_catalog = mp.contains(catalog['DisplayName'], inputs)
 
 
             # Si se encuentra.
@@ -452,6 +653,58 @@ while True:
                 # Imprimir mensaje de error.
                 print("""\n======================= ERROR =======================\n""")
                 print("El/la artista de nombre '" + inputs + "' no se encuentra en el catálogo. Intente de nuevo.\n")
+                sys.exit(0)
+
+
+
+    # Si escoge la opción 6.
+        elif int(inputs[0]) == 6:
+            
+            # Limpiar la consola.
+            os.system('cls')
+
+            # Imprimir mensaje de carga.
+            print("""\n======================= Inputs Req. 5 =======================\n""")
+                
+            # Preguntar al usuario por el departamento.
+            inputs = input('Por favor, escriba el nombre del departamento del museo cuyas obras desea transportar:\n  -> ')
+
+            # Determinar si el artista con nombre inputs se encuentra en este.
+            is_in_catalog = mp.contains(catalog['Department'], inputs)
+
+
+            # Si se encuentra.
+            if (is_in_catalog):
+                
+                # Imprimir mensaje de carga.
+                print("""\n====================== Outputs Req. 5 =======================\n""")
+
+                # Iniciar el tiempo.
+                start_time = time.process_time()
+
+                # Guardar respuesta del requerimiento 3.
+                resp_req_5 = controller.req_5(catalog, inputs)
+
+                # Parar el tiempo.
+                stop_time = time.process_time()
+
+                # Calcular tiempo de ejecución en milisegundos e imprimirlo.
+                elapsed_time_mseg = (stop_time - start_time)*1000
+                print("Tiempo de ejecución del requerimiento:", elapsed_time_mseg, "milisegundos.\n")
+
+                # Imprimir respuesta.
+                print_req_5(inputs, resp_req_5)
+
+
+            # De lo contrario.
+            else:
+
+                # Limpiar la consola.
+                os.system('cls')
+
+                # Imprimir mensaje de error.
+                print("""\n======================= ERROR =======================\n""")
+                print("El departamento de nombre '" + inputs + "' no se encuentra en el museo. Intente de nuevo.\n")
                 sys.exit(0)
 
 
@@ -504,7 +757,13 @@ while True:
 
         # Si escoge la opción 0.
         elif int(inputs[0]) == 0:
-            print()
+            # Limpiar la consola.
+            os.system('cls')
+            
+            # Imprimir mensaje de carga.
+            print("""\n======================= Exit =======================\n""")
+            print("Gracias por usar la herramienta. Hasta pronto.\n")
+
             sys.exit(0)
 
 

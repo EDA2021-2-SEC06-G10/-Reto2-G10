@@ -103,7 +103,7 @@ def load_artists (catalog: dict) -> None:
     """
 
     # Crear variable que guarda la referencia al archivo de los artistas.
-    artists_file = cf.data_dir + '\\MoMA\\Artists-utf8-small.csv'
+    artists_file = cf.data_dir + '\\MoMA\\Artists-utf8-80pct.csv'
 
     # Crear variable que guarda todos los artistas.
     input_file = csv.DictReader(open(artists_file, encoding='utf-8'))
@@ -339,6 +339,29 @@ def req_3 (catalog: dict, param_DisplayName: str) -> tuple:
 
 
 
+# Función del requerimiento 5.
+def req_5 (catalog: dict, param_Dep: str) -> tuple:
+    """
+        Dado el nombre de un departamento del museo, esta función retorna un tupla que contiene los siguientes elementos:
+            1- Precio en USD en el que se debería incurrir si se desea transportar todas las obras de
+               dicho dpto.
+            2- Peso estimado de todas las obras.
+            3- Lista ordenada de las obras del dpto. según su fecha.
+            4- Lista ordenada de las obras del dpto. según su precio de transporte.
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_Dep (str): cadena referente a un dpto. del museo.
+
+        Retorno:
+            -> (tuple): tupla con los elementos descritos anteriormente.
+
+    """
+
+    # Crear variable que guarda la respuesta del requerimiento 5 y retornarla.
+    resp_req_5 = model.req_5(catalog, param_Dep)
+    return resp_req_5
+
 
 
 
@@ -393,43 +416,3 @@ print(lt.getElement(lista, lt.size(lista) - 2)['Title'])
 print(lt.getElement(lista, lt.size(lista) - 1)['Title'])
 print(lt.getElement(lista, lt.size(lista))['Title'])
 '''
-
-#'''
-
-# Pruebas req. 5.
-catalog = init_catalog()
-load_data(catalog)
-
-#map_dpt = catalog['Department']
-#lista_obras = mp.get(map_dpt, 'Drawings & Prints')['value']
-
-resp = model.req_5(catalog, 'Drawings & Prints')
-
-''' 
-print(resp[0], resp[1])
-
-lista = resp[2]
-
-print(lt.size(lista))
-print(lt.getElement(lista, 1)['Title'], lt.getElement(lista, 1)['Date'])
-print(lt.getElement(lista, 2)['Title'], lt.getElement(lista, 2)['Date'])
-print(lt.getElement(lista, 3)['Title'], lt.getElement(lista, 3)['Date'])
-print(lt.getElement(lista, 4)['Title'], lt.getElement(lista, 4)['Date'])
-print(lt.getElement(lista, 5)['Title'], lt.getElement(lista, 5)['Date'])
-'''
-
-lista = resp[3]
-taman = lt.size(lista)
-
-print(resp[0])
-print(resp[1])
-
-print()
-
-print(lt.getElement(lista, taman)['Title'], lt.getElement(lista, taman)['Price (USD)'])
-print(lt.getElement(lista, taman - 1)['Title'], lt.getElement(lista, taman - 1)['Price (USD)'])
-print(lt.getElement(lista, taman - 2)['Title'], lt.getElement(lista, taman - 2)['Price (USD)'])
-print(lt.getElement(lista, taman - 3)['Title'], lt.getElement(lista, taman - 3)['Price (USD)'])
-
-
-#'''
