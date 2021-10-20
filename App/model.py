@@ -28,12 +28,11 @@
 #####-----#####-----#####-----#####-----#####   IMPORTACIÓN MÓDULOS   #####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####   ####---#####---####   #####-----#####-----#####-----#####-----#####
 
+from math import pi
 import config as cf
 import datetime as date
-from DISClib.DataStructures import probehashtable
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
-from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import quicksort as qui
 assert cf
 
@@ -70,25 +69,9 @@ def new_catalog () -> dict:
                'Nationality': None,
                'ConstituentID': None,
                'DateAcquired': None,
-               'DisplayName': None}
+               'DisplayName': None,
+               'Department': None}
     
-
-
-    #####-----#####-----#####   Definición Listas   #####-----#####-----#####
-
-    """
-        A continuacion se crearán listas cuyos elementos serán diccionarios que representan
-        artistas u obras que cumplen alguna caracterísitca particular.
-
-        Es importante notar que todas las listas referencian a la misma información;
-        es decir, si en una lista se guarda la información de una obra y en otra también,
-        ambas están referenciando al mismo espacio en memoria, mas no se está copiando
-        dos veces la misma información. Esto se debe a la inmutabilidad del tipo de dato
-        dict de Python.
-    
-    """
-
-
 
 
     #####-----#####-----#####   Definición Maps/Índices   #####-----#####-----#####
@@ -112,38 +95,36 @@ def new_catalog () -> dict:
 
     # Map cuyas llaves son las técnicas y cuyos valores son listas enlazadas que contienen
     # información relevante de las obras que fueron creadas usando dicha técnica.
-    # El tamaño del mapa se asignó como el siguiente primo a 146.100, ya que esta es la cantidad de obras que hay.
-    catalog["Medium"] = mp.newMap(probehashtable.nextPrime(146100), maptype='CHAINING', loadfactor=4.0)
+    catalog["Medium"] = mp.newMap(146100, maptype='CHAINING', loadfactor=4.0)
 
 
     # Map cuyas llaves son las nacionalidades y cuyos valores son listas enlazadas que contienen
     # información relevante de las obras cuyo/s autor/es tiene/n dicha nacionalidad.
-    # El tamaño del mapa se asignó como el siguiente primo a 200, porque hay 194 países reconocidos
-    # por la ONU y se añadieron 6 espacios extra para evitar re-hashing (en la medida de lo posible).
-    catalog["Nationality"] = mp.newMap(probehashtable.nextPrime(200/0.5), maptype='PROBING', loadfactor=0.5)
+    catalog["Nationality"] = mp.newMap(200, maptype='PROBING', loadfactor=0.5)
 
 
     # Map cuyas llaves son ConstituentID's y cuyos valores son el artista reconocido con dicho ConstituentID.
-    # El tamaño del mapa se asignó como el siguiente primo a 15.224 porque hay 15.224 artistas en el catálogo.
-    catalog["ConstituentID"] = mp.newMap(probehashtable.nextPrime(15224), maptype='CHAINING', loadfactor=4.0)
+    catalog["ConstituentID"] = mp.newMap(15224, maptype='CHAINING', loadfactor=4.0)
 
 
     # Map cuyas llaves son fechas de adquisición (DateAcquired) y cuyos valores son listas enlazadas que contienen
     # información relevante de las obras cuya fecha de adquisición es equivalente a la llave.
-    # El tamaño del mapa se asignó como el siguiente primo a 146100 porque esa es la cantidad de obras en el catálogo.
-    catalog["DateAcquired"] = mp.newMap(probehashtable.nextPrime(146100), maptype='CHAINING', loadfactor=4.0)
+    catalog["DateAcquired"] = mp.newMap(146100, maptype='CHAINING', loadfactor=4.0)
 
 
     # Map cuyas llaves son nombres de artistas del catálogo (DisplayName) y cuyos valores son maps. En estos últimos,
     # las llaves son las técnicas que usó el artista para crear sus obras (Medium) y los valores son listas enlazadas
     # cuyos elementos son dichas obras.
-    # El tamaño del mapa se asignó como el siguiente primo a 15.224 porque hay 15.224 artistas en el catálogo.
-    catalog["DisplayName"] = mp.newMap(probehashtable.nextPrime(15224), maptype='CHAINING', loadfactor=4.0)
+    catalog["DisplayName"] = mp.newMap(15224, maptype='CHAINING', loadfactor=4.0)
+
+
+    # Map cuyas llaves son nombres de departamentos del museo (Departments) y cuyos valores son listas enlazadas que contienen
+    # información relevante de las obras que pertenecen a dicho departamento.
+    catalog["Department"] = mp.newMap(500, maptype='PROBING', loadfactor=0.5)
 
 
 
-    #####-----#####-----#####-----#####   Retorno   #####-----#####-----#####-----#####
-
+    # Retorno.
     return catalog
 
 
@@ -496,6 +477,63 @@ def add_pair_Medium_artworkList (Medium_map: dict, param_Medium: str, artwork: d
 
 
 
+# Función que agrega una pareja llave-valor al map "Department".
+def add_Department (catalog: dict, param_Department: str, artwork: dict) -> None:
+    """
+        Esta función permite agregar una pareja llave-valor al map "Department" del catálogo.
+        
+        La llave deberá ser un departamento del catálogo, es decir, una cadena de caracteres.
+        El valor deberá ser una lista enlazada, cuyos elementos son diccionarios que
+        representan a cada obra (para más detalle de qué información contienen estos
+        diccionarios, revisar la documentación de la función new_artwork()).
+
+        En caso de que la pareja Department-lista_obras ya exista, se añadirá la obra a lista_obras
+        referente al departemento respectivo (la llave).
+        En caso de que la pareja Department-lista_obras no exista, se creará la lista que contiene a las
+        obras que pertenecen a dicho depto., se añadirá la información de la obra a dicha lista
+        y se añadirá la nueva pareja Department-lista_obras al map "Department" del catálogo.
+
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_Department (str): cadena referente a un departamento del catálogo.
+            -> artwork (dict): diccionario que representa la obra que se quiere añadir.
+
+        No tiene retorno.
+
+    """
+    
+    # Crear variable que guarda el mapa "Department" del catálogo.
+    # Crear variable que determina si la pareja llave-valor ya existe.
+    map_Department = catalog["Department"]
+    exists = mp.contains(map_Department, param_Department)
+
+
+    # Si ya existe la pareja llave-valor.
+    if (exists):
+
+        # Crear variable que guarda la lista de las obras que pertenecen al dpto.
+        list_Department_artworks = mp.get(map_Department, param_Department)["value"]
+
+        # Añade la obra a list_Department_artworks.
+        lt.addLast(list_Department_artworks, artwork)
+
+
+    # Si no existe la pareja llave-valor.
+    else:
+
+        # Crear una nueva lista de las obras que pertenecen al dpto.
+        new_list_Department_artworks = lt.newList('SINGLE_LINKED')
+        
+        # Añade la obra a new_list_Department_artworks.
+        lt.addLast(new_list_Department_artworks, artwork)
+
+        # Añade la pareja Department-lista_obras al map.
+        mp.put(map_Department, param_Department, new_list_Department_artworks)
+    
+
+
+
 
 
 
@@ -580,6 +618,7 @@ def new_artwork (artwork_info: dict) -> dict:
                "Dimensions": "",
                "CreditLine": "",
                "Classification": "",
+               "Department": "",
                "DateAcquired": "",
                "Circumference (cm)": "",
                "Depth (cm)": "",
@@ -607,7 +646,7 @@ def new_artwork (artwork_info: dict) -> dict:
             # Asignar el valor de la propiedad como "".
             artwork[property] = ""
 
-        # De lo contrario
+        # De lo contrario.
         else:            
             # Añadir propiedad.
             if not(is_ConstituentID):
@@ -745,6 +784,27 @@ def cmp_artworks_by_Date (artwork_1: dict, artwork_2: dict) -> bool:
 
     # Determinar si es menor o no y retornar respuesta.
     answer = (artwork_1['Date'] < artwork_2['Date'])
+    return answer
+
+
+
+# Función que compara dos obras según sus fechas.
+def cmp_artworks_by_Price (artwork_1: dict, artwork_2: dict) -> bool:
+    """
+        Esta función permite determinar si la fecha de artwork_1 es menor que la fecha de artwork_2.
+
+        Parámetros:
+            -> artwork_1: información de la primera obra.
+            -> artwork_2: información de la segunda obra.
+
+        Retorno:
+            -> (bool): True en caso de que la fecha de artwork_1 sea menor que la fecha de artwork_2.
+                       False de lo contrario. 
+
+    """
+
+    # Determinar si es menor o no y retornar respuesta.
+    answer = (artwork_1['Price (USD)'] < artwork_2['Price (USD)'])
     return answer
 
 
@@ -935,6 +995,64 @@ def req_3 (catalog: dict, param_DisplayName: str) -> tuple:
 
 
 
+# Función del requerimiento 5.
+def req_5 (catalog: dict, param_Dep: str) -> tuple:
+    """
+        Dado el nombre de un/una artista, esta función retorna 
+
+        Parámetros:
+            -> catalog (dict): catálogo.
+            -> param_DisplayName (str): nombre del artista.
+
+        Retorno:
+            -> (tuple): tupla cuyo primer elemento es la lista que contiene la respuesta
+                        y cuyo segundo elemento representa la cantidad de obras que fueron
+                        adquiridas por compra.
+
+    """
+
+    # Guardar mapa 'Department'.
+    map_Dep = catalog['Department']
+
+    # Guardar lista obras.
+    artwork_list = mp.get(map_Dep, param_Dep)['value']
+
+    # Crear variable precio total.
+    total_price = 0.0
+    total_weight = 0.0
+
+    new_art_lt = lt.newList()
+
+    # Recorrer artwork_list.
+    for artwork in lt.iterator(artwork_list):
+
+        # Calcular precio.
+        price = calc_price(artwork)
+        total_price += price
+
+        # Peso.
+        weight = artwork['Weight (kg)']
+        total_weight += weight
+
+        # Añadir a new_art_lt si tiene fecha.
+        if (artwork['Date'] != ''):
+            lt.addLast(new_art_lt,artwork)
+
+        # Añadir a new_art_lt si tiene peso.
+        if (artwork['Date'] != ''):
+            lt.addLast(new_art_lt,artwork)
+
+    
+
+
+
+    order_artw_lt = qui.sort(new_art_lt, cmp_artworks_by_Date)
+
+    order_artwork_list_price = qui.sort(artwork_list, cmp_artworks_by_Price) 
+
+    return(total_price, total_weight, order_artw_lt, order_artwork_list_price)
+
+
 
 #####-----#####-----#####-----#####-----#####   #####---####----#####   #####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####   FUNCIONES ADICIONALES   #####-----#####-----#####-----#####-----#####
@@ -966,3 +1084,137 @@ def turn_into_list (list_in_str: str) -> list:
 
     # Retornar la lista.
     return artists_list
+
+
+
+# Función que calcula el precio de transporte de una obra.
+def calc_price (artwork: dict) -> float:
+    """
+        Dada la información de una obra, esta función permite calcular su precio de transporte
+        asociado. Además, permite añadir a dicha un atributo nuevo llamado trans_price, el cual
+        debe ser de tipo float.
+
+        Parámetros:
+            -> artwork (dict): diccionario que contiene la información de la obra.
+
+        Retorno:
+            -> (float): precio de transporte de la obra.
+
+    """
+
+    price = 0.0                     # Variable de precio total.
+    UNIT_COST = 72                  # Precio unitario por kg.
+    VOL_UNIT_COST = 72/1000000      # Precio unitario por m^3.
+    AREA_UNIT_COST = 72 /10000      # Precio unitario por m^2.
+    radius = 0.0                    # Variable radio.
+
+    # Crear variables que guardan las dimensiones de la obra.
+    depth = artwork['Depth (cm)']
+    diam = artwork['Diameter (cm)']
+    height = artwork['Height (cm)']
+    lenght = artwork['Length (cm)']
+    weight = artwork['Weight (kg)']
+    width = artwork['Width (cm)']
+    
+
+    # Variable que cuenta la cantidad de dimensiones que tiene la obra diferentes al diámetro.
+    num_dim = 0
+
+
+    # Condicionales para modificar dimensiones.
+
+    if (depth != ""):
+        if (depth != '0'):
+            depth = float(depth)
+            num_dim += 1
+        else:
+            depth = 1
+
+    else:
+        depth = 1
+
+    if (height != ""):
+        if (height != '0'):
+            height = float(height)
+            num_dim += 1
+        else:
+            height = 1
+
+    else:
+        height = 1
+
+    if (lenght != ""):
+        if (lenght != '0'):
+            lenght = float(lenght)
+            num_dim += 1
+        else:
+            lenght = 1
+    else:
+        lenght = 1
+
+    if (width != ""):
+        if (width != '0'):
+            width = float(width)
+            num_dim += 1
+        else:
+            width = 1
+    else:
+        width = 1
+
+
+
+    #####-----#####-----#####   Cálculos   #####-----#####-----#####
+
+    # Caso -1: no tiene dimensiones.
+    if (num_dim == 0 and weight != "" and diam != ""):
+        price = 0.0
+
+    else:
+        # Caso 0: la figura tiene peso.
+        if (weight != ""):
+            price = UNIT_COST * float(weight)
+
+        else:
+            
+            weight = 0.0        # Atualizar valor peso.
+
+            # Si la figura tiene diámetro.
+            if (diam != ""):
+                
+                # Calcular radio.
+                radius = float(diam)/2
+
+                # Caso 1: si tiene radio y solo una dimensión más, entonces es cilindro.
+                if (num_dim == 1):
+                    price = (VOL_UNIT_COST) * (pi * (depth*height*lenght*width) * radius**2)
+                    weight = (pi * (depth*height*lenght*width) * radius**2)/100
+
+                # Caso 2: si tiene radio y dos dimensiones o más, entonces es esfera.
+                if (num_dim == 2):
+                    price = (VOL_UNIT_COST) * (4/3 * pi * radius**3)
+                    weight = (4/3 * pi * radius**3)/100
+
+                # Caso 3: si tiene radio y nada más, entonces es círculo.
+                if (num_dim == 0):
+                    price = (AREA_UNIT_COST) * (pi * radius**2)
+
+
+            # Si la figura no tiene diámetro.
+            else:
+                
+                # Caso 4: tiene dos dimensiones, entonces es rectángulo.
+                if (num_dim == 2):
+                    price = (AREA_UNIT_COST) * (depth*height*lenght*width)
+
+                # Caso 5: tiene tres dimensiones, entonces es cubo o figura tridimensional con diferentes medidas.
+                if (num_dim == 3):
+                    price = (VOL_UNIT_COST) * (depth*height*lenght*width)
+                    weight = (depth*height*lenght*width)/100
+    
+
+    # Actualizar peso.
+    artwork['Weight (kg)'] = weight
+
+    # Retornar precio.
+    artwork['Price (USD)'] = price
+    return price

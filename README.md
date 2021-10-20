@@ -16,21 +16,25 @@ Integrantes:
 
 ##--##--##  Model  ##--##--##
 
- 1- 
+ 1- Se añadió el atributo 'Department' a las obras en la función new_artwork().
+
+ 2- Se añadió al catálogo el map 'Department' en la función new_catalog().
+
+ 3- Se definieron las siguientes funciones:
+          -> add_Department
+          -> 
+ 4- 
 
 
 
 ##--##--##  Controller  ##--##--##
 
- 1-   
+ 1- Se modificó la función load_artworks() para que fuese posible añadir parejas llave-valor al map 'Department'.
 
 
 ##--##--##  View  ##--##--##
  
- 1- Se definieron las siguientes funciones:
-      -> print_req_1().
- 
- 2- Se modificó el menú para que se pudiese implementar el requerimiento 1.
+ 1- 
 
 
 #####-----#####-----#####-----#####   #---#---#   #####-----#####-----#####-----#####
@@ -53,7 +57,7 @@ Integrantes:
 
 ##--##--##  Model  ##--##--##
 
- 1-  Determinar si la quicksort es el algoritmo más conveniente para ordenar la lista de la función req_1().
+ 1-  Determinar si quicksort es el algoritmo más conveniente para ordenar la lista de la función req_1().
 
 
 ##--##--##  Controller  ##--##--##

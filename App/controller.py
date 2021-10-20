@@ -164,14 +164,16 @@ def load_artworks (catalog: dict) -> None:
         # Crear una obra con la información de la iteración actual.
         artwork_info = model.new_artwork(artwork)
 
-        # Crear variables que guardan el Medium, los ConstituentID y el DateAcquired de artwork.
+        # Crear variables que guardan el Medium, los ConstituentID, el DateAcquired y el Department de artwork.
         artwork_Medium = artwork_info["Medium"]
         ConstituentID_list = artwork_info["ConstituentID"]
         artwork_DateAcquired = artwork_info["DateAcquired"]
+        artwork_Dep = artwork_info["Department"]
 
-        # Crear variabes que guardan los maps ConstituentID y DisplayName del catálogo.
+        # Crear variabes que guardan los maps ConstituentID, DisplayName y Department del catálogo.
         map_ConstituentID = catalog["ConstituentID"]
         map_DisplayName = catalog['DisplayName']
+        map_Dep = catalog['Department']
 
 
 
@@ -252,6 +254,14 @@ def load_artworks (catalog: dict) -> None:
         # Añadir la pareja llave-valor al map 'DateAcquired' si su fecha de adquicisión está registrada.
         if not (artwork_DateAcquired == ""):
             model.add_DateAcquired(catalog, artwork_DateAcquired, artwork_info)
+
+
+        
+        #####-----#####-----#####-----#####   Bloque Map 'Department'   #####-----#####-----#####-----#####
+
+        # Añadir la pareja llave-valor al map 'Department' si su dpto. está registrado.
+        if not (artwork_Dep == ""):
+            model.add_Department(catalog, artwork_Dep, artwork_info)
         
 
 
@@ -384,17 +394,42 @@ print(lt.getElement(lista, lt.size(lista) - 1)['Title'])
 print(lt.getElement(lista, lt.size(lista))['Title'])
 '''
 
+#'''
+
+# Pruebas req. 5.
+catalog = init_catalog()
+load_data(catalog)
+
+#map_dpt = catalog['Department']
+#lista_obras = mp.get(map_dpt, 'Drawings & Prints')['value']
+
+resp = model.req_5(catalog, 'Drawings & Prints')
+
+''' 
+print(resp[0], resp[1])
+
+lista = resp[2]
+
+print(lt.size(lista))
+print(lt.getElement(lista, 1)['Title'], lt.getElement(lista, 1)['Date'])
+print(lt.getElement(lista, 2)['Title'], lt.getElement(lista, 2)['Date'])
+print(lt.getElement(lista, 3)['Title'], lt.getElement(lista, 3)['Date'])
+print(lt.getElement(lista, 4)['Title'], lt.getElement(lista, 4)['Date'])
+print(lt.getElement(lista, 5)['Title'], lt.getElement(lista, 5)['Date'])
 '''
-map_prueba = mp.newMap()
 
-for i in range(6):
-    nuevo_mapa = mp.newMap()
-    mp.put(map_prueba, "mapa_" + str(i), nuevo_mapa)
+lista = resp[3]
+taman = lt.size(lista)
 
-mapa_del_mapa = mp.get(map_prueba, "mapa_1")['value']
-for j in range(4):
-    mp.put(mapa_del_mapa, "medio_" + str(j), j)
+print(resp[0])
+print(resp[1])
 
-for medio in lt.iterator(mp.keySet(mapa_del_mapa)):
-    print(medio)
-'''
+print()
+
+print(lt.getElement(lista, taman)['Title'], lt.getElement(lista, taman)['Price (USD)'])
+print(lt.getElement(lista, taman - 1)['Title'], lt.getElement(lista, taman - 1)['Price (USD)'])
+print(lt.getElement(lista, taman - 2)['Title'], lt.getElement(lista, taman - 2)['Price (USD)'])
+print(lt.getElement(lista, taman - 3)['Title'], lt.getElement(lista, taman - 3)['Price (USD)'])
+
+
+#'''
