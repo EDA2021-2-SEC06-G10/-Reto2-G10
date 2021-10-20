@@ -25,6 +25,8 @@
 #####-----#####-----#####-----#####-----#####-----#####   ####---#####---####   #####-----#####-----#####-----#####-----#####-----#####
 
 import os
+import datetime as date
+from typing import Container
 import config as cf
 from DISClib.ADT import map as mp
 import time
@@ -60,8 +62,7 @@ def print_menu () -> None:
     print("  4- Cargar requerimiento 3.")
     print("  5- Cargar requerimiento 4.")
     print("  6- Cargar requerimiento 5.")
-    print("  7- Cargar requerimiento 6.")
-    print("  8- Cargar requerimiento del lab. 6.")
+    print("  7- Cargar requerimiento del lab. 6.")
     print("  0- Salir.")
 
 
@@ -136,6 +137,120 @@ def print_req_1 (first_year: int, last_year: int, resp_req_1: dict) -> None:
 
 
 
+# Función que imprime la respuesta del requerimiento 2.
+def print_req_2 (first_date, last_date, resp_req_2: dict) -> None:
+    """
+        Esta función imprime la respuesta del requerimiento 2 de una manera amigable para el usuario.
+
+        Parámetro:
+            -> first_date: primera fecha del intervalo.
+            -> last_date: última fecha del intervalo.
+            -> resp_req_2 (tuple): lista que contiene las respuestas del requerimiento 2.
+
+        No tiene retorno.
+
+    """
+
+    # Desempaquetar respuesta.
+    ordered_ordered_list, num_purch = resp_req_2
+    num_artw = lt.size(ordered_ordered_list)
+    
+    # Mapa 'ConstituentID'.
+    map_consid = catalog['ConstituentID']
+
+
+    # Respuesta inicial.
+    print('En total, el museo adquirió', num_artw, 'obras entre',  first_date, 'y', str(last_date) + '.')
+    print('De estas obras,', num_purch, "fueron adquiridas por compra.\n")
+
+    # Lista.
+    print('Una muestra de algunas de las obras adquirirdas por el museo entre dichas fechas se dispone a continuación:\n')
+
+    # Tabla técnicas más usadas.
+    print("#" * 147)
+    print("# ", end = " ")
+    print(fixed_length('TÍTULO', 30), end = " # ")
+    print(fixed_length('ARTISTA(S)', 40), end = " # ")
+    print(fixed_length('FECHA', 5), end = " # ")
+    print(fixed_length('TÉCNICA', 25), end = " # ")
+    print(fixed_length('DIMENSIONES', 30), end = " # ")
+    print()
+    print("#" * 147)
+
+    if (lt.size(ordered_ordered_list)) < 6:
+        for element in lt.iterator(ordered_ordered_list):
+            
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 30), end = " # ")
+
+            if len(element['ConstituentID']) == 1:
+                artists_id = element['ConstituentID'][0]
+                name = mp.get(map_consid, float(int(artists_id)))['value']['DisplayName']
+                print(fixed_length(name, 40), end = " # ")
+            
+            else:
+                str_artists = ''
+                num_artists = len(element['ConstituentID']) - 1
+                counter = 0
+                for artist in element['ConstituentID']:
+                    name = mp.get(map_consid, float(int(artist)))['value']['DisplayName']
+                    if (counter == num_artists):
+                        str_artists += name
+                    else:
+                        str_artists += name + ", "
+                    counter += 1
+                print(fixed_length(str_artists, 40), end = " # ")
+
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Medium'], 25), end = " # ")
+            print(fixed_length(element['Dimensions'], 30), end = " # ")
+            print()
+
+        print("#" * 147)
+
+    else:
+
+        new_list = lt.newList('SINGLE_LINKED')
+        lt.addLast(new_list, lt.getElement(ordered_ordered_list, 1))
+        lt.addLast(new_list, lt.getElement(ordered_ordered_list, 2))
+        lt.addLast(new_list, lt.getElement(ordered_ordered_list, 3))
+        lt.addLast(new_list, lt.getElement(ordered_ordered_list, num_artw - 2))
+        lt.addLast(new_list, lt.getElement(ordered_ordered_list, num_artw - 1))
+        lt.addLast(new_list, lt.getElement(ordered_ordered_list, num_artw))
+         
+
+        for element in lt.iterator(new_list):
+            
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 30), end = " # ")
+
+            if len(element['ConstituentID']) == 1:
+                artists_id = element['ConstituentID'][0]
+                name = mp.get(map_consid, float(int(artists_id)))['value']['DisplayName']
+                print(fixed_length(name, 40), end = " # ")
+            
+            else:
+                str_artists = ''
+                num_artists = len(element['ConstituentID']) - 1
+                counter = 0
+                for artist in element['ConstituentID']:
+                    name = mp.get(map_consid, float(int(artist)))['value']['DisplayName']
+                    if (counter == num_artists):
+                        str_artists += name
+                    else:
+                        str_artists += name + ", "
+                    counter += 1
+                print(fixed_length(str_artists, 40), end = " # ")
+
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Medium'], 25), end = " # ")
+            print(fixed_length(element['Dimensions'], 30), end = " # ")
+            print()
+
+        print("#" * 147)
+
+
+
 # Función que imprime la respuesta del requerimiento 3.
 def print_req_3 (artist_name: str, resp_req_3: tuple) -> None:
     """
@@ -166,6 +281,7 @@ def print_req_3 (artist_name: str, resp_req_3: tuple) -> None:
     print(fixed_length('CANTIDAD', 8), end = " # ")
     print()
     print("#" * 56)
+
     if (lt.size(ordered_list_most_used_medium)) < 5:
         for element in lt.iterator(ordered_list_most_used_medium):
             print("# ", end = " ")
@@ -510,6 +626,8 @@ catalog = None
 start_time = 0.0
 stop_time = 0.0
 
+# Limpiar la consola.
+os.system('cls')
 
 # Iteración usuario.
 while True:
@@ -554,7 +672,7 @@ while True:
 
 
 
-        # Si escoge la opción 4.
+        # Si escoge la opción 2.
         elif int(inputs[0]) == 2:
 
             # Limpiar la consola.
@@ -598,6 +716,59 @@ while True:
             # De lo contrario.
             else:
                 
+                # Imprimir mensaje de error.
+                print("""\n======================= ERROR =======================\n""")
+                print("Debe ingresar un intervalo válido. Intente de nuevo.\n")
+                sys.exit(0)
+
+
+
+        # Si escoge la opción 3.
+        elif int(inputs[0]) == 3:
+            
+            # Limpiar la consola.
+            os.system('cls')
+
+            # Imprimir mensaje de carga.
+            print("""\n======================= Inputs Req. 2 =======================\n""")
+                
+            # Preguntar al usuario por las fechas.
+            inputs_1 = input('Por favor, escriba la fecha inicial (AAAA-MM-DD):\n  -> ')
+            inputs_2 = input('Por favor, escriba la fecha final (AAAA-MM-DD):\n  -> ')
+
+            # Crear variables con las fechas de adquisición modificadas.
+            mod_first_date = date.datetime.strptime(inputs_1, '%Y-%m-%d')
+            mod_last_date = date.datetime.strptime(inputs_2, '%Y-%m-%d')
+
+            # Determinar si el intervalo es válido.
+            valid = not ((mod_last_date < mod_first_date) or (mod_first_date > mod_last_date) or (mod_first_date == mod_last_date))
+
+            # Si el intervalo es válido..
+            if (valid):
+                
+                # Imprimir mensaje de carga.
+                print("""\n====================== Outputs Req. 2 =======================\n""")
+
+                # Iniciar el tiempo.
+                start_time = time.process_time()
+
+                # Guardar respuesta del requerimiento 3.
+                resp_req_2 = controller.req_2(catalog, inputs_1, inputs_2)
+
+                # Parar el tiempo.
+                stop_time = time.process_time()
+
+                # Calcular tiempo de ejecución en milisegundos e imprimirlo.
+                elapsed_time_mseg = (stop_time - start_time)*1000
+                print("Tiempo de ejecución del requerimiento:", elapsed_time_mseg, "milisegundos.\n")
+
+                # Imprimir respuesta.
+                print_req_2(inputs_1, inputs_2, resp_req_2)
+
+
+            # De lo contrario.
+            else:
+
                 # Imprimir mensaje de error.
                 print("""\n======================= ERROR =======================\n""")
                 print("Debe ingresar un intervalo válido. Intente de nuevo.\n")
@@ -657,7 +828,7 @@ while True:
 
 
 
-    # Si escoge la opción 6.
+        # Si escoge la opción 6.
         elif int(inputs[0]) == 6:
             
             # Limpiar la consola.
@@ -710,7 +881,7 @@ while True:
 
 
         # Si escoge la opción 8.
-        elif int(inputs[0]) == 8:
+        elif int(inputs[0]) == 7:
 
             # Imprimir mensaje de carga.
             print("""\n======================= OPCIÓN 7 =======================\n""")

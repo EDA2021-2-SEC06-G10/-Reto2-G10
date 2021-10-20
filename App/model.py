@@ -935,8 +935,9 @@ def req_2 (catalog: dict, first_date: str, last_date: str) -> tuple:
     # Ordenar lista.
     ordered_ordered_list = qui.sort(ordered_list, cmp_by_DateAcquired)
         
-    # Retornar tupla.
-    return (ordered_ordered_list, num_purch)
+    # Empaquetar respuestas y retornalas.
+    return_tuple = (ordered_ordered_list, num_purch)
+    return return_tuple
 
 
 

@@ -16,14 +16,7 @@ Integrantes:
 
 ##--##--##  Model  ##--##--##
 
- 1- Se añadió el atributo 'Department' a las obras en la función new_artwork().
-
- 2- Se añadió al catálogo el map 'Department' en la función new_catalog().
-
- 3- Se definieron las siguientes funciones:
-          -> add_Department
-          -> 
- 4- 
+ 1- Se ordenó la función req_5.
 
 
 
