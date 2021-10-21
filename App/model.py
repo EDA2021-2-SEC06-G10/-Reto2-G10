@@ -33,6 +33,7 @@ import config as cf
 import datetime as date
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
+from DISClib.Algorithms.Sorting import mergesort as mer
 from DISClib.Algorithms.Sorting import quicksort as qui
 assert cf
 
@@ -910,7 +911,7 @@ def req_2 (catalog: dict, first_date: str, last_date: str) -> tuple:
     """
 
     # Crear lista y entero de retorno.
-    ordered_list = lt.newList("SINGLE_LINKED")
+    ordered_list = lt.newList("ARRAY_LIST")
     num_purch = 0
 
     # Crear variable que guarda el mapa 'DateAcquired' del catálogo.
@@ -954,7 +955,7 @@ def req_2 (catalog: dict, first_date: str, last_date: str) -> tuple:
                     num_purch += 1
 
     # Ordenar lista.
-    ordered_ordered_list = qui.sort(ordered_list, cmp_by_DateAcquired)
+    ordered_ordered_list = mer.sort(ordered_list, cmp_by_DateAcquired)
         
     # Empaquetar respuestas y retornalas.
     return_tuple = (ordered_ordered_list, num_purch)
@@ -986,7 +987,7 @@ def req_3 (catalog: dict, param_DisplayName: str) -> tuple:
     total_mediums = mp.size(Mediums_map)
     most_used_medium = ''
     list_most_used_medium = None
-    list_medium_sizes = lt.newList('SINGLE_LINKED')
+    list_medium_sizes = lt.newList('ARRAY_LIST')
 
 
     # Recorrer todas las técnicas de Mediums_map.
@@ -1010,7 +1011,6 @@ def req_3 (catalog: dict, param_DisplayName: str) -> tuple:
     # Crear varable que guarda dicha lista ordenada.
     list_most_used_medium = mp.get(Mediums_map, most_used_medium)['value']
     ordered_list_most_used_medium = qui.sort(list_most_used_medium, cmp_artworks_by_Date)
-    
     
 
     # Armar tupla de retorno y retornarla.
@@ -1092,7 +1092,7 @@ def req_5 (catalog: dict, param_Dep: str) -> tuple:
     total_weight = 0.0                                  # Variable peso total.
 
     # Crear lista que contiene las obras que pertenecen al dpto. y que tiene una fecha registrada.
-    lt_artworks_dep_date = lt.newList()
+    lt_artworks_dep_date = lt.newList('ARRAY_LIST')
 
 
     # Recorrer artwork_list.
