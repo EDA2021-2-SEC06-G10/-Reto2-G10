@@ -173,7 +173,6 @@ def load_artworks (catalog: dict) -> None:
         # Crear variabes que guardan los maps ConstituentID, DisplayName y Department del catálogo.
         map_ConstituentID = catalog["ConstituentID"]
         map_DisplayName = catalog['DisplayName']
-        map_Dep = catalog['Department']
 
 
 
@@ -212,8 +211,8 @@ def load_artworks (catalog: dict) -> None:
                     # Crear variable que guarda la nacionalidad del artista identificado con ConstituentID_key.
                     artists_nacion = mp.get(map_ConstituentID, ConstituentID_key)["value"]["Nationality"]
 
-                    # Concatenar la nacionalidad del artista actual con las demás nacionalidades.
-                    new_Nacion_key += artists_nacion
+                    # Añadir la pareja llave-valor al map 'Nationality'.
+                    model.add_Nationality(catalog, artists_nacion, artwork_info)
 
 
 
@@ -242,10 +241,6 @@ def load_artworks (catalog: dict) -> None:
                         # Guardar el Medium_map del artista y añadir la obra actual al mapa 'Medium' del artista.
                         artists_Medium_map = mp.get(map_DisplayName, artist_DisplayName)['value'] 
                         model.add_pair_Medium_artworkList(artists_Medium_map, artwork_Medium, artwork_info)
-
-
-        # Añadir la pareja llave-valor al map 'Nationality'.
-        model.add_Nationality(catalog, new_Nacion_key, artwork_info)
 
 
 
@@ -339,6 +334,30 @@ def req_3 (catalog: dict, param_DisplayName: str) -> tuple:
 
 
 
+# Función del requerimiento 4.
+def req_4 (catalog: dict) -> tuple:
+    """
+        Esta función retorna una tupla con los siguientes elementos:
+            1- Una lista cuyos elementos son mapas; las parejas llave-valor de estos son:
+                -> Llaves: 'Nationality' y 'Size'.
+                -> Valores: cadena referente a una nacionalidad y cantidad de obras
+                            cuyo/s autor/es pertenece/n a dicha nacionalidad.
+            2- Lista con las obras pertenecientes a la nacionalidad que más obras tiene.
+
+        Parámetro:
+            -> catalog (dict): catálogo.
+
+        Retorno:
+            -> (dict): tupla con los elementos descritos anteriormente.
+
+    """
+
+    # Crear variable que guarda la respuesta del requerimiento 4 y retornarla.
+    resp_req_4 = model.req_4(catalog)
+    return resp_req_4
+
+
+
 # Función del requerimiento 5.
 def req_5 (catalog: dict, param_Dep: str) -> tuple:
     """
@@ -361,22 +380,3 @@ def req_5 (catalog: dict, param_Dep: str) -> tuple:
     # Crear variable que guarda la respuesta del requerimiento 5 y retornarla.
     resp_req_5 = model.req_5(catalog, param_Dep)
     return resp_req_5
-
-
-
-'''
-# Pruebas req 2.
-catalog = init_catalog()
-load_data(catalog)
-
-resp = req_2(catalog, '1944-06-06', '1989-11-09')
-print(lt.size(resp[0]), resp[1])
-
-lista = resp[0]
-print(lt.getElement(lista,1)['Title'])
-print(lt.getElement(lista,2)['Title'])
-print(lt.getElement(lista,3)['Title'])
-print(lt.getElement(lista, lt.size(lista) - 2)['Title'])
-print(lt.getElement(lista, lt.size(lista) - 1)['Title'])
-print(lt.getElement(lista, lt.size(lista))['Title'])
-'''

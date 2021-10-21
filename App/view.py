@@ -138,7 +138,7 @@ def print_req_1 (first_year: int, last_year: int, resp_req_1: dict) -> None:
 
 
 # Función que imprime la respuesta del requerimiento 2.
-def print_req_2 (first_date, last_date, resp_req_2: dict) -> None:
+def print_req_2 (first_date, last_date, resp_req_2: tuple) -> None:
     """
         Esta función imprime la respuesta del requerimiento 2 de una manera amigable para el usuario.
 
@@ -343,6 +343,143 @@ def print_req_3 (artist_name: str, resp_req_3: tuple) -> None:
         print("#" * 131)
 
     print()
+
+
+
+# Función que imprime la respuesta del requerimiento 4.
+def print_req_4 (resp_req_4: tuple) -> None:
+    """
+        Esta función imprime la respuesta del requerimiento 4 de una manera amigable para el usuario.
+
+        Parámetro:
+            -> resp_req_4 (tuple): lista que contiene las respuestas del requerimiento 4.
+
+        No tiene retorno.
+
+    """
+    # Desempaquetar resp_req_4.
+    lt_natio, lt_nacio_most_artw = resp_req_4
+
+    # Mapa 'ConstituentID'.
+    map_consid = catalog['ConstituentID']
+
+    # Cantidad obras en lt_nacio_most_artw
+    num_artw = lt.size(lt_nacio_most_artw)
+
+    # Primera Parte.
+    print('La tabla con las 10 nacionalidades con mayor cantidad de obras se dispone a continuación:\n')
+    print("#" * 44)
+    print("# ", end = " ")
+    print(fixed_length('NACIONALIDAD', 30), end = " # ")
+    print(fixed_length('OBRAS', 6), end = " # ")
+    print()
+    print("#" * 44)
+
+    contador = 1
+
+    for natio in lt.iterator(lt_natio):
+        
+        if contador <= 10:
+            a = mp.get(natio, 'Nationality')['value']
+            b = mp.get(natio, 'Size')['value']
+            print("# ", end = " ")
+            print(fixed_length(a, 30), end = " # ")
+            print(fixed_length(str(b), 6), end = " # ")
+            print()
+        else:
+            break
+        contador += 1 
+    print("#" * 44)
+
+    natio_1 = lt.getElement(lt_natio, 1)
+    a = mp.get(natio_1, 'Nationality')['value']
+    b = mp.get(natio_1, 'Size')['value']
+    print('\nComo se puede apreciar,', "'" + a + "'", 'es la nacionalidad con más obras en el museo', "(" + str(b) + ").")
+
+    # Segunda Parte.
+    print('Una muestra de algunas obras de dicha nacionalidad se dispone a continuación:\n')
+
+    print("#" * 147)
+    print("# ", end = " ")
+    print(fixed_length('TÍTULO', 30), end = " # ")
+    print(fixed_length('ARTISTA(S)', 40), end = " # ")
+    print(fixed_length('FECHA', 5), end = " # ")
+    print(fixed_length('TÉCNICA', 25), end = " # ")
+    print(fixed_length('DIMENSIONES', 30), end = " # ")
+    print()
+    print("#" * 147)
+
+    if (lt.size(lt_nacio_most_artw)) < 6:
+        for element in lt.iterator(lt_nacio_most_artw):
+            
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 30), end = " # ")
+
+            if len(element['ConstituentID']) == 1:
+                artists_id = element['ConstituentID'][0]
+                name = mp.get(map_consid, float(int(artists_id)))['value']['DisplayName']
+                print(fixed_length(name, 40), end = " # ")
+            
+            else:
+                str_artists = ''
+                num_artists = len(element['ConstituentID']) - 1
+                counter = 0
+                for artist in element['ConstituentID']:
+                    name = mp.get(map_consid, float(int(artist)))['value']['DisplayName']
+                    if (counter == num_artists):
+                        str_artists += name
+                    else:
+                        str_artists += name + ", "
+                    counter += 1
+                print(fixed_length(str_artists, 40), end = " # ")
+
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Medium'], 25), end = " # ")
+            print(fixed_length(element['Dimensions'], 30), end = " # ")
+            print()
+
+        print("#" * 147)
+
+    else:
+        
+        new_list = lt.newList('SINGLE_LINKED')
+        lt.addLast(new_list, lt.getElement(lt_nacio_most_artw, num_artw - 5))
+        lt.addLast(new_list, lt.getElement(lt_nacio_most_artw, num_artw - 4))
+        lt.addLast(new_list, lt.getElement(lt_nacio_most_artw, num_artw - 3))
+        lt.addLast(new_list, lt.getElement(lt_nacio_most_artw, num_artw - 2))
+        lt.addLast(new_list, lt.getElement(lt_nacio_most_artw, num_artw - 1))
+        lt.addLast(new_list, lt.getElement(lt_nacio_most_artw, num_artw))
+         
+
+        for element in lt.iterator(new_list):
+            
+            print("# ", end = " ")
+            print(fixed_length(element['Title'], 30), end = " # ")
+
+            if len(element['ConstituentID']) == 1:
+                artists_id = element['ConstituentID'][0]
+                name = mp.get(map_consid, float(int(artists_id)))['value']['DisplayName']
+                print(fixed_length(name, 40), end = " # ")
+            
+            else:
+                str_artists = ''
+                num_artists = len(element['ConstituentID']) - 1
+                counter = 0
+                for artist in element['ConstituentID']:
+                    name = mp.get(map_consid, float(int(artist)))['value']['DisplayName']
+                    if (counter == num_artists):
+                        str_artists += name
+                    else:
+                        str_artists += name + ", "
+                    counter += 1
+                print(fixed_length(str_artists, 40), end = " # ")
+
+            print(fixed_length(element['Date'], 5), end = " # ")
+            print(fixed_length(element['Medium'], 25), end = " # ")
+            print(fixed_length(element['Dimensions'], 30), end = " # ")
+            print()
+
+        print("#" * 147)
 
 
 
@@ -828,6 +965,33 @@ while True:
 
 
 
+        # Si escoge la opción 5.
+        elif int(inputs[0]) == 5:
+            
+            # Limpiar la consola.
+            os.system('cls')
+            
+            # Imprimir mensaje de carga.
+            print("""\n====================== Outputs Req. 4 =======================\n""")
+
+            # Iniciar el tiempo.
+            start_time = time.process_time()
+
+            # Guardar respuesta del requerimiento 3.
+            resp_req_4 = controller.req_4(catalog)
+
+            # Parar el tiempo.
+            stop_time = time.process_time()
+
+            # Calcular tiempo de ejecución en milisegundos e imprimirlo.
+            elapsed_time_mseg = (stop_time - start_time)*1000
+            print("Tiempo de ejecución del requerimiento:", elapsed_time_mseg, "milisegundos.\n")
+
+            # Imprimir respuesta.
+            print_req_4(resp_req_4)
+
+
+
         # Si escoge la opción 6.
         elif int(inputs[0]) == 6:
             
@@ -883,8 +1047,11 @@ while True:
         # Si escoge la opción 8.
         elif int(inputs[0]) == 7:
 
+            # Limpiar la consola.
+            os.system('cls')
+            
             # Imprimir mensaje de carga.
-            print("""\n======================= OPCIÓN 7 =======================\n""")
+            print("""\n====================== Inputs Req. Lab. 6 =======================\n""")
             
             # Preguntar al usuario por la nacionalidad.
             inputs = input('Por favor, escriba la nacionalidad:\n  -> ')
@@ -906,8 +1073,8 @@ while True:
                 num_artists = lt.size(artists_list)
 
                 # Imprimir respuesta.
-                print("\n<> Respuesta <>")
-                print("El número total de obras cuyo/s autor/es tiene/n nacionalidad", "'" + str(inputs) + "'", "es:", str(num_artists) + ".")
+                print("""\n====================== Outputs Req. Lab. 6 =======================\n""")
+                print("El número total de obras cuyo/s autor/es tiene/n nacionalidad", "'" + str(inputs) + "'", "es:", str(num_artists) + ".\n")
 
 
             # Si se ingresa un valor erróneo.
@@ -920,9 +1087,6 @@ while True:
                 print("""\n======================= ERROR =======================\n""")
                 print("Debe ingresar una nacionalidad válida.\n")
                 sys.exit(0)
-
-            sys.exit(0)
-
 
 
 

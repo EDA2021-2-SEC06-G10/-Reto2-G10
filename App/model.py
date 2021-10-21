@@ -584,7 +584,7 @@ def new_artist (artist_info: dict) -> dict:
         artist["BeginDate"] = "N.A."
     if artist["EndDate"] == 0:
         artist["EndDate"] = "N.A."
-    if artist["Nationality"] == "":
+    if artist["Nationality"] == "" or artist["Nationality"] == "Nationality unknown":
         artist["Nationality"] = "N.A."
     if artist["Gender"] == "":
         artist["Gender"] = "N.A."
@@ -811,6 +811,27 @@ def cmp_artworks_by_Price (artwork_1: dict, artwork_2: dict) -> bool:
 
 
 
+# Función que compara dos nacionalidades según la cantidad de obras que tiene.
+def cmp_nacion (nacion_1: dict, nacion_2: dict) -> bool:
+    """
+        Esta función determina si la cantidad de obras de nacion_1 es mayor que la de nacion_2.
+
+        Parámetros:
+            -> nacion_1 (dict): map de la primera nacionalidad.
+            -> nacion_2 (dict): map de la segunda nacionalidad.
+
+        Retorno:
+            -> (bool): True en caso de que la cantidad de obras de nacion_1 sea mayor que la de nacion_2.
+                       False de lo contrario. 
+
+    """
+    
+    # Determinar si es mayor o no y retornar respuesta.
+    answer = (mp.get(nacion_1, 'Size')['value'] > mp.get(nacion_2, 'Size')['value'])
+    return answer
+
+
+
 
 #####-----#####-----#####-----#####-----#####   #####---#######----#####   #####-----#####-----#####-----#####-----#####
 #####-----#####-----#####-----#####-----#####   FUNCIONES REQUERIMIENTOS   #####-----#####-----#####-----#####-----#####
@@ -995,6 +1016,54 @@ def req_3 (catalog: dict, param_DisplayName: str) -> tuple:
     # Armar tupla de retorno y retornarla.
     answer = (total_artworks, total_mediums, most_used_medium, ordered_list_most_used_medium, ordered_list_medium_sizes)
     return answer        
+
+
+
+# Función del requerimiento 4.
+def req_4 (catalog: dict) -> tuple:
+    """
+        Esta función retorna una tupla con los siguientes elementos:
+            1- Una lista cuyos elementos son mapas; las parejas llave-valor de estos son:
+                -> Llaves: 'Nationality' y 'Size'.
+                -> Valores: cadena referente a una nacionalidad y cantidad de obras
+                            cuyo/s autor/es pertenece/n a dicha nacionalidad.
+            2- Lista con las obras pertenecientes a la nacionalidad que más obras tiene.
+
+        Parámetro:
+            -> catalog (dict): catálogo.
+
+        Retorno:
+            -> (dict): tupla con los elementos descritos anteriormente.
+
+    """
+
+    map_natio = catalog['Nationality']          # Mapa nacionalidades.
+    lt_natio = lt.newList('ARRAY_LIST')         # Mapa de retorno.
+
+    # Recorrer cada pareja llave-valor de map_natio.
+    for natio in lt.iterator(mp.keySet(map_natio)):
+
+        # Guardar lista de obras la nacionalidad y determinar su tamaño.
+        lt_artw_natio = mp.get(map_natio, natio)['value']
+        size_lt_artw_nacion = lt.size(lt_artw_natio)
+
+        # Crear mapa con pareja nacio-size_lt_artw_nacion, añadir parejas y añadir mapa a lt_natio.
+        map_nacio_size = mp.newMap(numelements = 10, maptype = 'CHAINING')
+        mp.put(map_nacio_size, 'Nationality', natio)
+        mp.put(map_nacio_size, 'Size', size_lt_artw_nacion)
+        lt.addLast(lt_natio, map_nacio_size)
+
+    
+    # Ordenar lt_natio, determinar nacionalidad con más obras y guardar sus obras.
+    ordered_lt_natio = qui.sort(lt_natio, cmp_nacion)
+    nacio_most_artw = mp.get(lt.getElement(ordered_lt_natio, 1), 'Nationality')['value']
+    lt_nacio_most_artw = mp.get(map_natio, nacio_most_artw)['value']
+
+    # Empaquetar variables y retornarlas.
+    return_tuple = (lt_natio, lt_nacio_most_artw)
+    return return_tuple
+
+
 
 
 
